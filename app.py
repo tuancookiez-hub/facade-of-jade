@@ -266,7 +266,6 @@ with gr.Blocks(css=CUSTOM_CSS, title="Facade of Jade") as demo:
 
     chat = gr.ChatInterface(
         fn=chat_stream,
-        type="messages",
         examples=[
             "I've come a long way to find you.",
             "Will you hear my problem?",
@@ -274,8 +273,6 @@ with gr.Blocks(css=CUSTOM_CSS, title="Facade of Jade") as demo:
             "You look like a man with a past.",
             "I challenge your judgment.",
         ],
-        fill_height=True,
-        chatbot=gr.Chatbot(elem_classes="chat-wrap", height=540),
     )
 
     chat.chatbot.change(get_state_display, None, state_display)
