@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from typing import Callable
 
@@ -78,7 +79,10 @@ BEATS: dict[str, StoryBeat] = {
             "His expression hardens. He reveals he has known your true allegiance all along. "
             "The door slams shut."
         ),
-        check_precondition=lambda state: state["trust"] < 10 and state["mood"] == "hostile",
+        check_precondition=lambda state: state["trust"] < 10
+        and state["mood"] == "hostile"
+        and state.get("player_challenged", False)
+        and state.get("turns", 0) > 3,
         transitions=["ending_betrayal"],
     ),
     "ending_honor": StoryBeat(
@@ -254,12 +258,16 @@ KEYWORD_MAP: dict[str, list[str]] = {
 
 
 def classify_discourse_act(player_input: str) -> str:
-    """Classify player input into a discourse act via keyword matching."""
+    """Classify player input into a discourse act via keyword matching.
+
+    Uses word boundaries so substrings inside other words
+    (e.g. "ha" inside "have") do not match.
+    """
     text = player_input.lower()
     scores = {act: 0 for act in KEYWORD_MAP}
     for act, keywords in KEYWORD_MAP.items():
         for keyword in keywords:
-            if keyword in text:
+            if re.search(rf"\b{re.escape(keyword)}\b", text):
                 scores[act] += 1
 
     best = max(scores, key=scores.get)
@@ -315,14 +323,14 @@ TRUST_DELTAS: dict[str, int] = {
     "insult": -15,
     "mock": -10,
     "threaten": -20,
-    "praise": 10,
-    "compliment_skill": 12,
+    "praise": 14,
+    "compliment_skill": 16,
     "flirt": 5,
     "apologize": 8,
-    "ask_question": 5,
-    "share_secret": 10,
+    "ask_question": 8,
+    "share_secret": 14,
     "challenge": -5,
-    "greet": 2,
+    "greet": 4,
     "goodbye": 0,
     "misc": 0,
 }
@@ -334,6 +342,7 @@ def update_state(state: dict, discourse_act: str, player_input: str) -> dict:
     trust = state.get("trust", 0)
     current_beat = state.get("current_beat", "intro")
     player_challenged = state.get("player_challenged", False)
+    turns = state.get("turns", 0) + 1
 
     if discourse_act == "challenge" or any(
         word in player_input.lower() for word in ("duel", "fight me", "challenge you")
@@ -354,14 +363,13 @@ def update_state(state: dict, discourse_act: str, player_input: str) -> dict:
     if not current_beat_obj.is_terminal:
         for target_id in current_beat_obj.transitions:
             target_beat = BEATS.get(target_id)
-            if target_beat and target_beat.check_precondition(
-                {
-                    "mood": new_mood,
-                    "trust": trust,
-                    "current_beat": current_beat,
-                    "player_challenged": player_challenged,
-                }
-            ):
+            if target_beat and target_beat.check_precondition({
+                "mood": new_mood,
+                "trust": trust,
+                "current_beat": current_beat,
+                "player_challenged": player_challenged,
+                "turns": turns,
+            }):
                 current_beat = target_id
                 break
 
@@ -371,6 +379,7 @@ def update_state(state: dict, discourse_act: str, player_input: str) -> dict:
         "current_beat": current_beat,
         "player_challenged": player_challenged,
         "discourse_act": discourse_act,
+        "turns": turns,
     }
 
 
@@ -464,3 +473,26 @@ def get_trace_entry(session_id: str, player_input: str, state: dict, npc_respons
         "npc_response": npc_response,
         "is_terminal": is_game_over(state),
     }
+
+
+
+if __name__ == "__main__":
+    from app import _initial_state
+    # 1. "have" must NOT match "ha" in mock list
+    a = classify_discourse_act("I have come a long way, Master")
+    assert a != "mock", f"BUG: friendly input classified as mock: {a}"
+    assert a in ("greet", "misc", "praise"), f"Expected greet/misc/praise, got {a}"
+    # 2. Praise should classify as praise
+    b = classify_discourse_act("You are wise.")
+    assert b == "praise", f"Expected praise, got {b}"
+    # 3. After 2 friendly turns, trust >= 25
+    s = _initial_state()
+    for msg in ("Hello, Master.", "You are wise."):
+        s = update_state(s, classify_discourse_act(msg), msg)
+    assert s["trust"] >= 25, f"Trust after 2 friendly turns: {s['trust']}"
+    # 4. betrayal must be unreachable in first 3 turns even with insults
+    s = _initial_state()
+    for msg in ("You are a fool.", "Kill you, coward.", "I challenge you to a duel."):
+        s = update_state(s, classify_discourse_act(msg), msg)
+    assert s["current_beat"] != "betrayal", f"betrayal reachable too early: {s['current_beat']}"
+    print("all tests passed")

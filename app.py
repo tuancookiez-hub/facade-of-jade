@@ -157,9 +157,10 @@ body, .gradio-container {
 def _initial_state() -> dict:
     return {
         "mood": "wary",
-        "trust": 0,
+        "trust": 15,
         "current_beat": "intro",
         "player_challenged": False,
+        "turns": 0,
     }
 
 
@@ -247,7 +248,7 @@ def get_state_display(request: gr.Request):
     return format_state_for_display(state)
 
 
-with gr.Blocks(css=CUSTOM_CSS, title="Facade of Jade") as demo:
+with gr.Blocks(title="Facade of Jade") as demo:
     gr.HTML(
         f"""
         <div class="app-shell">
@@ -285,4 +286,4 @@ with gr.Blocks(css=CUSTOM_CSS, title="Facade of Jade") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    demo.launch(server_name="0.0.0.0", server_port=7860, css=CUSTOM_CSS)
