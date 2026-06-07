@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facade of Jade — A Wuxia Drama</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main id="app">
+    <header class="ink-header">
+      <div class="title-stack">
+        <h1 class="title-zh">玉面樓</h1>
+        <h2 class="title-en">Facade of Jade</h2>
+      </div>
+      <div class="subtitle">An interactive Wuxia drama · Qwen3-4B on llama.cpp</div>
+    </header>
+
+    <section class="stage">
+      <aside class="npc-panel">
+        <div class="npc-portrait" aria-hidden="true">🗡</div>
+        <h3 class="npc-name" id="npc-name">Shen Wuqing</h3>
+        <p class="npc-title" id="npc-title">The Swordsman of No Emotion</p>
+
+        <div class="meters">
+          <div class="meter">
+            <span class="meter-label">Mood</span>
+            <span class="meter-value" id="mood-value">wary</span>
+            <div class="meter-bar"><div class="meter-fill" id="mood-bar" style="width:30%"></div></div>
+          </div>
+          <div class="meter">
+            <span class="meter-label">Trust</span>
+            <span class="meter-value" id="trust-value">0</span>
+            <div class="meter-bar"><div class="meter-fill" id="trust-bar" style="width:0%"></div></div>
+          </div>
+          <div class="meter">
+            <span class="meter-label">Beat</span>
+            <span class="meter-value" id="beat-value">intro</span>
+          </div>
+        </div>
+      </aside>
+
+      <section class="chat">
+        <div class="chat-log" id="chat-log" aria-live="polite"></div>
+        <form class="composer" id="composer">
+          <input
+            type="text"
+            id="input"
+            name="message"
+            placeholder="Speak to the swordsman..."
+            autocomplete="off"
+            autofocus
+            required
+          />
+          <button type="submit" id="send-btn">Send</button>
+        </form>
+      </section>
+    </section>
+
+    <footer class="ink-footer">
+      <span>Built for the Build Small Hackathon · Track 2: An Adventure in Thousand Token Wood</span>
+    </footer>
+  </main>
+
+  <script type="module" src="/static/app.js"></script>
+</body>
+</html>
