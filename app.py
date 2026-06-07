@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 
 import gradio as gr
 import httpx
@@ -16,6 +17,7 @@ from beats import (
     is_game_over,
     update_state,
 )
+from trace_utils import save_traces_locally
 
 MODAL_URL = os.environ.get(
     "MODAL_URL",
@@ -188,6 +190,11 @@ def _normalize_history(history) -> list[dict[str, str]]:
     return messages
 
 
+def _persist_trace_snapshot(trace_log: list[dict]) -> None:
+    """Persist a point-in-time trace snapshot without blocking the chat loop."""
+    save_traces_locally(trace_log)
+
+
 def chat_stream(message: str, history, request: gr.Request):
     """Stream NPC reply from Modal while maintaining per-session state."""
     session_id = _session_id(request)
@@ -234,6 +241,13 @@ def chat_stream(message: str, history, request: gr.Request):
 
         SESSIONS[session_id] = next_state
         TRACE_LOG.append(get_trace_entry(session_id, message, next_state, accumulated))
+        if len(TRACE_LOG) % 10 == 0:
+            trace_snapshot = TRACE_LOG.copy()
+            threading.Thread(
+                target=_persist_trace_snapshot,
+                args=(trace_snapshot,),
+                daemon=True,
+            ).start()
 
         if is_game_over(next_state):
             yield accumulated + "\n\n*The End*"
