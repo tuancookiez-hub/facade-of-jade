@@ -152,7 +152,6 @@ def main() -> int:
         processing_class=tokenizer,
         peft_config=lora_config,
         formatting_func=chat_formatting_func,
-        max_seq_length=1024,
     )
 
     train_result = trainer.train()
