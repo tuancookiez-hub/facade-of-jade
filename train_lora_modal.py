@@ -11,9 +11,10 @@ VOLUME_NAME = "facade-of-jade-lora-out"
 BASE_MODEL_NAME = "Qwen/Qwen3-4B-Instruct-2507"
 REMOTE_DATASET_PATH = "/data/loRA_training_data_v1_gpt5.jsonl"
 OUTPUT_DIR = "/outputs/facade-of-jade-qwen3-4b-lora"
-LOCAL_DATASET_PATH = (
-    Path(__file__).resolve().parent / "../loRA_training_data_v1_gpt5.jsonl"
-).resolve()
+LOCAL_REPO_DIR = Path(__file__).resolve().parent
+LOCAL_DATASET_PATH = (LOCAL_REPO_DIR / "../loRA_training_data_v1_gpt5.jsonl").resolve()
+LOCAL_TRAIN_LORA_PATH = LOCAL_REPO_DIR / "train_lora.py"
+REMOTE_TRAIN_LORA_PATH = "/root/train_lora.py"
 
 
 def _build_image() -> modal.Image:
@@ -36,6 +37,10 @@ def _build_image() -> modal.Image:
         .add_local_file(
             LOCAL_DATASET_PATH,
             REMOTE_DATASET_PATH,
+        )
+        .add_local_file(
+            LOCAL_TRAIN_LORA_PATH,
+            REMOTE_TRAIN_LORA_PATH,
         )
     )
 
