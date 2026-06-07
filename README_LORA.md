@@ -2,7 +2,11 @@
 
 To fine-tune locally with a GPU, run `python train_lora.py --dry-run` first and then `python train_lora.py`.
 
-To fine-tune on Modal, see `train_lora_modal.py` as an optional follow-up.
+To fine-tune on Modal, run `python -m modal run train_lora_modal.py::train_remote`.
+
+To validate the Modal dataset wiring without training, run `python -m modal run train_lora_modal.py::train_remote --dry-run`.
+
+The trained adapter is written to the Modal volume `facade-of-jade-lora-out` at `/outputs/facade-of-jade-qwen3-4b-lora`.
 
 Required packages:
 - `torch`
