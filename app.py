@@ -15,7 +15,7 @@ MODAL_URL = os.environ.get(
     "https://t-abdullah-rashid--facade-of-jade-backend-serve.modal.run",
 )
 
-INDEX_HTML = f"""<!doctype html>
+INDEX_HTML = """<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -166,7 +166,7 @@ INDEX_HTML = f"""<!doctype html>
     }}
   </style>
 </head>
-<body data-modal-url="{MODAL_URL}">
+<body data-modal-url="__MODAL_URL__">
   <main id="app">
     <header class="ink-header">
       <div class="title-stack">
@@ -226,95 +226,93 @@ INDEX_HTML = f"""<!doctype html>
     const messages = [];
     const npcState = { mood: "wary", trust: 0, current_beat: "intro", mood_score: 30 };
 
-    function addMessage(role, content) {{
+    function addMessage(role, content) {
       const el = document.createElement("div");
-      el.className = `msg ${{role}}`;
+      el.className = `msg ${role}`;
       el.textContent = content;
       log.appendChild(el);
       log.scrollTop = log.scrollHeight;
       return el;
-    }}
+    }
 
-    function updateMeters(s) {{
+    function updateMeters(s) {
       $("mood-value").textContent = s.mood ?? "wary";
       $("trust-value").textContent = String(s.trust ?? 0);
       $("beat-value").textContent = s.current_beat ?? "intro";
       const moodPct = Math.max(0, Math.min(100, (s.mood_score ?? 30)));
-      $("mood-bar").style.width = `${{moodPct}}%`;
+      $("mood-bar").style.width = `${moodPct}%`;
       const trustPct = Math.max(0, Math.min(100, ((s.trust ?? 0) + 5) * 10));
-      $("trust-bar").style.width = `${{trustPct}}%`;
-    }}
+      $("trust-bar").style.width = `${trustPct}%`;
+    }
 
-    async function callBackend(messages, state) {{
-      const r = await fetch(`${{MODAL_URL}}/chat`, {{
+    async function callBackend(messages, state) {
+      const r = await fetch(`${MODAL_URL}/chat`, {
         method: "POST",
-        headers: {{ "Content-Type": "application/json" }},
-        body: JSON.stringify({{ messages, state }}),
-      }});
-      if (!r.ok || !r.body) throw new Error(`chat ${{r.status}}`);
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages, state }),
+      });
+      if (!r.ok || !r.body) throw new Error(`chat ${r.status}`);
       const reader = r.body.getReader();
       const decoder = new TextDecoder();
       let buf = "";
       let final = "";
-      while (true) {{
-        const {{ value, done }} = await reader.read();
+      while (true) {
+        const { value, done } = await reader.read();
         if (done) break;
-        buf += decoder.decode(value, {{ stream: true }});
+        buf += decoder.decode(value, { stream: true });
         const lines = buf.split("\\n");
         buf = lines.pop() ?? "";
-        for (const line of lines) {{
+        for (const line of lines) {
           const m = line.match(/^data: (.*)$/);
           if (!m) continue;
           if (m[1] === "[DONE]") return final;
-          try {{
+          try {
             const obj = JSON.parse(m[1]);
             if (obj.token) final += obj.token;
-          }} catch (e) {{}}
-        }}
-      }}
+          } catch (e) {}
+        }
+      }
       return final;
-    }}
+    }
 
-    async function sendNpcTurn(isFirst) {{
+    async function sendNpcTurn(isFirst) {
       sendBtn.disabled = true;
       input.disabled = true;
       const placeholder = addMessage("npc", "");
       placeholder.classList.add("streaming");
 
-      try {{
+      try {
         const reply = await callBackend(isFirst ? [] : messages, npcState);
         placeholder.classList.remove("streaming");
         placeholder.textContent = reply;
-        if (!isFirst && reply) messages.push({{ role: "assistant", content: reply }});
+        if (!isFirst && reply) messages.push({ role: "assistant", content: reply });
 
-        // Crude beat inference from the reply, so the UI feels alive
         const lower = reply.toLowerCase();
         if (/(drink|tea|rest)/.test(lower)) npcState.current_beat = "offer_drink";
         else if (/(what do you|why have you|trouble|problem)/.test(lower)) npcState.current_beat = "ask_problem";
         else if (/(leave|go|farewell)/.test(lower)) npcState.current_beat = "farewell";
-        // Crude trust heuristic
-        if (/(please|thank|i beg|honor|swear)/.test(reply.toLowerCase())) npcState.trust = Math.min(5, (npcState.trust || 0) + 1);
-        if (/(liar|fool|insult|shame)/.test(reply.toLowerCase())) npcState.trust = Math.max(-5, (npcState.trust || 0) - 1);
+        if (/(please|thank|i beg|honor|swear)/.test(lower)) npcState.trust = Math.min(5, (npcState.trust || 0) + 1);
+        if (/(liar|fool|insult|shame)/.test(lower)) npcState.trust = Math.max(-5, (npcState.trust || 0) - 1);
         updateMeters(npcState);
-      }} catch (e) {{
+      } catch (e) {
         placeholder.classList.remove("streaming");
-        placeholder.textContent = `[error: ${{e.message}}]`;
-      }} finally {{
+        placeholder.textContent = `[error: ${e.message}]`;
+      } finally {
         sendBtn.disabled = false;
         input.disabled = false;
         input.focus();
-      }}
-    }}
+      }
+    }
 
-    form.addEventListener("submit", async (e) => {{
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const text = input.value.trim();
       if (!text) return;
       input.value = "";
       addMessage("user", text);
-      messages.push({{ role: "user", content: text }});
+      messages.push({ role: "user", content: text });
       await sendNpcTurn(false);
-    }});
+    });
 
     addMessage("system", "A swordsman sits across from you, his hand resting on the hilt of his blade. The teahouse is quiet. The rain has stopped.");
     updateMeters(npcState);
@@ -326,8 +324,9 @@ INDEX_HTML = f"""<!doctype html>
 
 
 def build_demo() -> gr.Blocks:
+    html = INDEX_HTML.replace("__MODAL_URL__", MODAL_URL)
     with gr.Blocks(title="Facade of Jade", theme=gr.themes.Soft()) as demo:
-        gr.HTML(value=INDEX_HTML, sanitize_html=False)
+        gr.HTML(value=html, sanitize_html=False)
     return demo
 
 
