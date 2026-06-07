@@ -10,7 +10,10 @@ import gradio as gr
 import httpx
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse
 
-MODAL_URL = os.environ.get("MODAL_URL", "https://YOUR-USER--facade-of-jade-backend-chat.modal.run")
+MODAL_URL = os.environ.get(
+    "MODAL_URL",
+    "https://t-abdullah-rashid--facade-of-jade-backend-serve.modal.run",
+)
 FRONTEND_PATH = os.path.join(os.path.dirname(__file__), "static", "index.html")
 
 server = gr.Server()
