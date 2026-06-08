@@ -9,6 +9,15 @@ python_version: '3.13'
 app_file: app.py
 pinned: false
 license: mit
+tags:
+  - thousand-token-wood
+  - tiny-titan
+  - off-brand
+  - llama-champion
+  - sharing-is-caring
+  - field-notes
+  - best-demo
+  - best-agent
 short_description: A Wuxia drama in the spirit of Façade. Qwen3-4B.
 ---
 
