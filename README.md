@@ -1,5 +1,5 @@
 ---
-title: Facade of Jade — gr.Server Spike
+title: Facade of Jade
 emoji: 🗡️
 colorFrom: red
 colorTo: gray

@@ -35,7 +35,7 @@ APP_DIR = Path(__file__).resolve().parent
 SESSIONS: dict[str, dict[str, Any]] = {}
 TRACE_LOG: list[dict[str, Any]] = []
 
-app = Server(title="Facade of Jade — Server Spike")
+app = Server(title="Facade of Jade")
 
 
 def initial_state() -> dict[str, Any]:
