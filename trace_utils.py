@@ -44,7 +44,7 @@ def load_traces(filepath: str = "traces.jsonl") -> list[dict]:
 
 def publish_traces_to_hub(
     filepath: str = "traces.jsonl",
-    repo_id: str = "tunacookie/facade-of-jade-traces",
+    repo_id: str = "build-small-hackathon/facade-of-jade-traces",
     token: str | None = None,
 ) -> str:
     """Upload the trace file to a Hugging Face dataset repository."""
