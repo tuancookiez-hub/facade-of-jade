@@ -4,76 +4,123 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Facade of Jade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Crimson+Text:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/server_static/style.css" />
 </head>
 <body>
-  <main class="shell">
-    <section class="hero">
-      <p class="eyebrow">Build Small Hackathon · Tiny Titan · llama.cpp on Modal</p>
-      <h1>Facade of Jade</h1>
+  <main class="shell" aria-label="Facade of Jade game interface">
+    <section class="brand-panel" aria-label="Game identity">
+      <div class="seal-mark" aria-hidden="true">梁</div>
+      <p class="micro-title">A Tiny Titan Drama Engine</p>
+      <div class="title-rule"></div>
+      <h1>Facade<br />of Jade</h1>
       <p class="intro">A rain-dark teahouse. A swordsman with one hand on his blade. Your wording changes his trust, mood, and story path.</p>
-    </section>
-
-    <section class="game-grid">
-      <article class="stage-card">
-        <div class="portrait" aria-hidden="true">
-          <div class="moon"></div>
-          <div class="sword"></div>
-          <div class="figure">梁</div>
-        </div>
-        <div class="dialogue">
-          <p class="speaker">Master Liang</p>
-          <div id="messages" class="messages">
-            <div class="message assistant">The tea has cooled, yet you remain. Speak carefully.</div>
+      <div class="left-log" aria-label="Recent dialogue">
+        <p class="panel-label">Recent exchange</p>
+        <div id="messages" class="messages">
+          <div class="message assistant">
+            <span class="message-meta"><b>Master Liang</b><time>Now</time></span>
+            <span class="message-text">The tea has cooled, yet you remain. Speak carefully.</span>
           </div>
         </div>
-      </article>
-
-      <aside class="director-card">
-        <p class="eyebrow">Drama Engine</p>
-        <h2 id="beat">The Teahouse</h2>
-        <dl>
-          <div><dt>Turn</dt><dd id="turns">0</dd></div>
-          <div><dt>Mood</dt><dd id="mood">wary</dd></div>
-          <div><dt>Mood shift</dt><dd id="mood-shift">wary → wary</dd></div>
-          <div><dt>Trust</dt><dd><span id="trust">15</span>% <span id="trust-delta" class="delta">+0</span></dd></div>
-          <div><dt>Last act</dt><dd id="last-act">none</dd></div>
-          <div><dt>Hot button</dt><dd id="hot-button">none</dd></div>
-          <div><dt>Beat goal</dt><dd id="beat-goal">test visitor</dd></div>
-        </dl>
-        <div class="meter"><span id="trust-meter" style="width:15%"></span></div>
-        <div class="paths social-games" aria-label="Social games">
-          <p class="path-title">Social games</p>
-          <div><span>Affinity</span><meter id="social-affinity" min="0" max="100" value="0"></meter></div>
-          <div><span>Therapy</span><meter id="social-realization" min="0" max="100" value="0"></meter></div>
-          <div><span>Tension</span><meter id="social-tension" min="0" max="100" value="35"></meter></div>
-        </div>
-        <div class="paths" aria-label="Path pressure">
-          <p class="path-title">Path pressure</p>
-          <div><span>Revelation</span><meter id="path-revelation" min="0" max="100" value="15"></meter></div>
-          <div><span>Alliance</span><meter id="path-alliance" min="0" max="100" value="5"></meter></div>
-          <div><span>Duel</span><meter id="path-duel" min="0" max="100" value="85"></meter></div>
-          <div><span>Betrayal</span><meter id="path-betrayal" min="0" max="100" value="65"></meter></div>
-        </div>
-        <p id="mix-in" class="director-note">Main beat continues.</p>
-        <p class="director-note">Inspired by Façade: discourse acts, beat goals, hot-button mix-ins, social games, and endings.</p>
-      </aside>
+      </div>
     </section>
 
-    <section class="controls">
-      <div class="approaches">
-        <button data-prompt="Master Liang, I bow before your blade and ask for guidance.">Respect</button>
-        <button data-prompt="What happened at Jade Mountain? Tell me the truth.">Question</button>
-        <button data-prompt="Forgive my sharp tongue. I came here desperate.">Apologize</button>
-        <button data-prompt="You hide behind old stories because you fear the truth.">Provoke</button>
-        <button data-prompt="I challenge your judgment — the seal belongs to the people.">Challenge</button>
+    <section class="stage-panel" aria-label="Narrative stage">
+      <div class="ink-scene" aria-hidden="true">
+        <div class="paper-grain"></div>
+        <div class="moon"></div>
+        <div class="mountain mountain-a"></div>
+        <div class="mountain mountain-b"></div>
+        <div class="tree"><span></span></div>
+        <div class="pagoda">
+          <div class="roof roof-top"></div>
+          <div class="roof roof-mid"></div>
+          <div class="pagoda-body"></div>
+          <div class="lantern">梁</div>
+        </div>
+        <div class="master-silhouette">
+          <div class="head"></div>
+          <div class="topknot"></div>
+          <div class="robe"></div>
+          <div class="blade"></div>
+        </div>
       </div>
-      <form id="chat-form">
-        <input id="player-input" autocomplete="off" placeholder="Speak to Master Liang..." />
-        <button id="send-button" type="submit">Speak</button>
-        <button id="reset-button" type="button">Reset</button>
-      </form>
-      <p id="status" class="status">Ready.</p>
+
+      <article class="quote-card" aria-live="polite">
+        <p id="current-quote" class="current-quote">The tea has cooled, yet you remain. Speak carefully.</p>
+        <p class="speaker"><span></span>Master Liang</p>
+      </article>
+
+      <section class="input-stack" aria-label="Player input">
+        <form id="chat-form" class="chat-form">
+          <input id="player-input" autocomplete="off" placeholder="What do you say or do?" />
+          <button id="send-button" class="send-button" type="submit" aria-label="Speak">→</button>
+        </form>
+        <p class="hints">Hints: Ask about his past • Offer respect • Challenge his view • Share a secret</p>
+        <p id="status" class="status">Ready.</p>
+      </section>
+    </section>
+
+    <aside class="status-panel" aria-label="Drama status">
+      <div class="status-head">
+        <p class="panel-label">Status</p>
+        <button id="reset-button" class="icon-button" type="button" title="Reset story" aria-label="Reset story">↺</button>
+      </div>
+
+      <h2 id="beat">The Teahouse</h2>
+      <dl class="status-list">
+        <div><dt>Turn</dt><dd id="turns">0</dd></div>
+        <div><dt>Mood</dt><dd><span id="mood-dot" class="mood-dot mood-wary"></span><span id="mood">wary</span></dd></div>
+        <div><dt>Mood shift</dt><dd id="mood-shift">wary → wary</dd></div>
+        <div><dt>Trust</dt><dd><span id="trust">15</span>% <span id="trust-delta" class="delta">+0</span></dd></div>
+        <div><dt>Last act</dt><dd id="last-act">none</dd></div>
+      </dl>
+      <div class="trust-track" aria-label="Trust meter"><span id="trust-meter" style="width:15%"></span></div>
+
+      <section class="paths" aria-label="Path pressure">
+        <div class="section-title-row">
+          <p class="path-title">Path pressure</p>
+          <span aria-hidden="true">ⓘ</span>
+        </div>
+        <label><span>Revelation</span><meter id="path-revelation" min="0" max="100" value="15"></meter></label>
+        <label><span>Alliance</span><meter id="path-alliance" min="0" max="100" value="5"></meter></label>
+        <label><span>Duel</span><meter id="path-duel" min="0" max="100" value="85"></meter></label>
+        <label><span>Betrayal</span><meter id="path-betrayal" min="0" max="100" value="65"></meter></label>
+        <p class="status-help">Path Pressure reflects the story direction's pull based on your choices.</p>
+      </section>
+
+      <button id="insights-toggle" class="insights-toggle" type="button" aria-expanded="false" aria-controls="insights-panel">View insights <span>⌄</span></button>
+      <section id="insights-panel" class="insights-panel" hidden>
+        <dl class="status-list compact">
+          <div><dt>Hot button</dt><dd id="hot-button">none</dd></div>
+          <div><dt>Beat goal</dt><dd id="beat-goal">Transition-in: test the visitor and establish suspicion.</dd></div>
+          <div><dt>Mix-in</dt><dd id="mix-in">Main beat continues.</dd></div>
+        </dl>
+        <div class="paths social-games" aria-label="Social games">
+          <p class="path-title">Social games</p>
+          <label><span>Affinity</span><meter id="social-affinity" min="0" max="100" value="0"></meter></label>
+          <label><span>Therapy</span><meter id="social-realization" min="0" max="100" value="0"></meter></label>
+          <label><span>Tension</span><meter id="social-tension" min="0" max="100" value="35"></meter></label>
+        </div>
+      </section>
+    </aside>
+
+    <section class="action-row" aria-label="Suggested approaches">
+      <button class="action-card" data-prompt="Master Liang, I bow before your blade and ask for guidance.">
+        <span class="action-icon">❦</span><span><b>Respect</b><small>Lower tension, increase trust.</small></span><i>→</i>
+      </button>
+      <button class="action-card" data-prompt="What happened at Jade Mountain? Tell me the truth.">
+        <span class="action-icon">?</span><span><b>Question</b><small>Seek truth, gain insight.</small></span><i>→</i>
+      </button>
+      <button class="action-card" data-prompt="You hide behind old stories because you fear the truth.">
+        <span class="action-icon">⚔</span><span><b>Provoke</b><small>Increase tension, risk a duel.</small></span><i>→</i>
+      </button>
+      <button class="action-card" data-prompt="I challenge your judgment — the seal belongs to the people.">
+        <span class="action-icon">♛</span><span><b>Challenge</b><small>Test his limits, court danger.</small></span><i>→</i>
+      </button>
     </section>
   </main>
   <script src="/server_static/app.js"></script>
