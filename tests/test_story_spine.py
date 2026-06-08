@@ -74,6 +74,17 @@ def test_system_prompt_includes_only_revealed_truths_and_current_milestone() -> 
     assert "asked_about_seal" in prompt
 
 
+def test_system_prompt_enforces_game_pacing_and_next_hook() -> None:
+    state = _initial_state()
+    state = advance(state, "What happened to the jade seal?")
+    prompt = get_system_prompt(state)
+
+    assert "Usually reply in 1-2 sentences" in prompt
+    assert "3 sentences only for major revelations or endings" in prompt
+    assert "End with a concrete hook" in prompt
+    assert "Do not stack moon/blade/silence/mountain/wind imagery" in prompt
+
+
 def test_trace_entry_records_story_spine_state() -> None:
     state = _initial_state()
     state = advance(state, "What really happened the night the jade seal vanished?")
