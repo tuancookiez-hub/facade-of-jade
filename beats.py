@@ -452,7 +452,13 @@ def format_state_for_display(state: dict) -> str:
     trust = max(0, min(100, int(state.get("trust", 0))))
     filled = trust // 10
     trust_bar = ("#" * filled) + ("-" * (10 - filled))
-    return f"**{beat.name}** | Mood: {state['mood'].capitalize()} | Trust: [{trust_bar}] {trust}%"
+    mood = str(state.get("mood", "wary")).capitalize()
+    act = str(state.get("discourse_act", "none")).replace("_", " ").title()
+    turn = int(state.get("turns", 0))
+    return (
+        f"**{beat.name}** | Turn: {turn} | Mood: {mood} | "
+        f"Trust: [{trust_bar}] {trust}% | Last act: {act}"
+    )
 
 
 def is_game_over(state: dict) -> bool:

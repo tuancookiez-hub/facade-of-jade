@@ -28,8 +28,14 @@ SESSIONS: dict[str, dict] = {}
 TRACE_LOG: list[dict] = []
 
 WUXIA_INTRO = (
-    "A swordsman sits across from you, his hand resting on the hilt of his blade. "
-    "The teahouse is quiet. The rain has stopped. What do you say?"
+    "Master Liang watches you from across a rain-dark teahouse, one hand resting on "
+    "the hilt of his blade. Your wording matters: respect can open him, insults can "
+    "turn the room hostile, and challenges may draw steel."
+)
+
+PLAYER_HINTS = (
+    "Try a respectful request, a sharp insult, a direct challenge, an apology, or a "
+    "question about Jade Mountain. The state bar updates after every reply."
 )
 
 CUSTOM_CSS = """
@@ -83,6 +89,15 @@ body, .gradio-container {
     color: var(--jade-muted);
     font-size: 1.15rem;
     line-height: 1.5;
+}
+
+.hero .player-hints {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-left: 3px solid var(--jade-gold);
+    background: rgba(211, 179, 106, 0.08);
+    color: var(--jade-ivory);
+    font-size: 1.03rem;
 }
 
 .state-bar {
@@ -265,10 +280,12 @@ def get_state_display(request: gr.Request):
 with gr.Blocks(title="Facade of Jade") as demo:
     gr.HTML(
         f"""
+        <style>{CUSTOM_CSS}</style>
         <div class="app-shell">
             <section class="hero">
                 <h1>Facade of Jade</h1>
                 <p>{WUXIA_INTRO}</p>
+                <p class="player-hints">{PLAYER_HINTS}</p>
             </section>
         </div>
         """
@@ -282,11 +299,11 @@ with gr.Blocks(title="Facade of Jade") as demo:
     chat = gr.ChatInterface(
         fn=chat_stream,
         examples=[
-            "I've come a long way to find you.",
-            "Will you hear my problem?",
-            "Tell me about the Jade Mountain Sect.",
-            "You look like a man with a past.",
-            "I challenge your judgment.",
+            "Master Liang, I bow before your blade and ask for guidance.",
+            "What happened at Jade Mountain? Tell me the truth.",
+            "Forgive my sharp tongue. I came here desperate.",
+            "You hide behind old stories because you fear the truth.",
+            "I challenge your judgment — the seal belongs to the people.",
         ],
     )
 
@@ -300,4 +317,4 @@ with gr.Blocks(title="Facade of Jade") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860, css=CUSTOM_CSS)
+    demo.launch(server_name="0.0.0.0", server_port=7860)
