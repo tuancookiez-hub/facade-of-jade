@@ -19,6 +19,9 @@ def test_describe_state_includes_drama_engine_fields() -> None:
     assert described["trust"] == 15
     assert described["trust_delta"] == 0
     assert described["path_pressure"]
+    assert "memory_flags" in described
+    assert "route_milestones" in described
+    assert "known_truths" in described
     assert {"revelation", "alliance", "duel", "betrayal"}.issubset(
         described["path_pressure"].keys()
     )

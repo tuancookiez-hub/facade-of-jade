@@ -18,6 +18,8 @@ from gradio import Server
 
 from beats import (
     classify_discourse_act,
+    default_memory_flags,
+    default_route_milestones,
     format_state_for_display,
     get_system_prompt,
     get_trace_entry,
@@ -96,6 +98,10 @@ def describe_state(state: dict[str, Any]) -> dict[str, Any]:
         "hot_button": state.get("hot_button", "none"),
         "mix_in": state.get("mix_in", "Main beat continues"),
         "beat_goal": state.get("beat_goal", "Main beat continues"),
+        "memory_flags": state.get("memory_flags", default_memory_flags()),
+        "route_milestones": state.get("route_milestones", default_route_milestones()),
+        "known_truths": state.get("known_truths", []),
+        "dramatic_notes": state.get("dramatic_notes", []),
     }
 
 

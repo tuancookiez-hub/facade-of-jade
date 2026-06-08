@@ -209,6 +209,9 @@ KEYWORD_MAP: dict[str, list[str]] = {
         "didn't mean",
         "my fault",
         "please forgive",
+        "make this right",
+        "too harshly",
+        "spoke too harshly",
     ],
     "ask_question": [
         "what",
@@ -365,6 +368,146 @@ MIX_IN_LABELS: dict[str, str] = {
     "none": "Main beat continues",
 }
 
+CANON_TRUTHS: dict[str, str] = {
+    "jade_seal_succession": "The jade seal is proof of succession, not just a relic.",
+    "jade_mountain_fell": "Jade Mountain fell during a night assault at the Jade Gates.",
+    "inside_betrayal": "The sect was not destroyed by outsiders alone; someone inside opened the way.",
+    "liang_survivor_guilt": "Master Liang survived the fall and carries guilt over what his blade did that night.",
+    "player_mark_hint": "The player may carry a mark or hunger connected to the seal's unfinished legacy.",
+}
+
+ROUTE_MILESTONE_LABELS: dict[str, list[str]] = {
+    "revelation": [
+        "Revelation route 1: admit the jade seal matters to succession.",
+        "Revelation route 2: confirm Jade Mountain fell at the Jade Gates.",
+        "Revelation route 3: imply there was an inside betrayal.",
+        "Revelation route 4: suspect the player is connected to the seal.",
+        "Revelation route 5: force a choice between truth and steel.",
+    ],
+    "alliance": [
+        "Alliance route 1: respect earns the first opening.",
+        "Alliance route 2: test whether the player wants power or repair.",
+        "Alliance route 3: offer a guarded path toward training.",
+        "Alliance route 4: name the player a possible successor.",
+    ],
+    "duel": [
+        "Duel route 1: warn the player once.",
+        "Duel route 2: hand moves to the blade.",
+        "Duel route 3: final chance to stand down.",
+        "Duel route 4: steel leaves the scabbard.",
+    ],
+    "betrayal": [
+        "Betrayal route 1: Demon Sect suspicion enters the room.",
+        "Betrayal route 2: contradictions harden Liang's expression.",
+        "Betrayal route 3: the door is no longer an exit.",
+        "Betrayal route 4: Liang exposes the deception.",
+    ],
+}
+
+
+def default_memory_flags() -> dict[str, object]:
+    return {
+        "asked_about_seal": False,
+        "seal_questions": 0,
+        "pressed_seal_twice": False,
+        "mentioned_demon_sect": False,
+        "asked_about_jade_mountain": False,
+        "accused_liang": False,
+        "challenged_liang": False,
+        "apologized_after_hostility": False,
+        "stayed_silent_count": 0,
+        "tested_by_silence": False,
+        "earned_first_truth": False,
+        "liang_warned_player": False,
+        "player_mark_revealed": False,
+    }
+
+
+def default_route_milestones() -> dict[str, int]:
+    return {"revelation": 0, "alliance": 0, "duel": 0, "betrayal": 0}
+
+
+def _is_silence_move(player_input: str) -> bool:
+    text = player_input.lower()
+    return any(phrase in text for phrase in ("remain silent", "stay silent", "i am silent", "keep silent", "say nothing", "watch him", "watch what"))
+
+
+def update_story_spine(state: dict, discourse_act: str, player_input: str, hot_button: str, trust_delta: int) -> dict[str, object]:
+    text = player_input.lower()
+    memory = {**default_memory_flags(), **dict(state.get("memory_flags", {}))}
+    milestones = {**default_route_milestones(), **dict(state.get("route_milestones", {}))}
+    known_truths = list(state.get("known_truths", []))
+    dramatic_notes = list(state.get("dramatic_notes", []))[-6:]
+
+    def reveal(truth_id: str) -> None:
+        truth = CANON_TRUTHS[truth_id]
+        if truth not in known_truths:
+            known_truths.append(truth)
+
+    def note(value: str) -> None:
+        if value not in dramatic_notes:
+            dramatic_notes.append(value)
+
+    if hot_button == "jade_seal":
+        memory["asked_about_seal"] = True
+        memory["seal_questions"] = int(memory.get("seal_questions", 0)) + 1
+        milestones["revelation"] = max(int(milestones["revelation"]), min(5, int(memory["seal_questions"])))
+        reveal("jade_seal_succession")
+        if int(memory["seal_questions"]) >= 2:
+            memory["pressed_seal_twice"] = True
+            milestones["revelation"] = max(int(milestones["revelation"]), 2)
+            note("The player keeps trying to circle the seal; Liang should notice the pattern.")
+
+    if hot_button == "jade_mountain" or "jade gates" in text:
+        memory["asked_about_jade_mountain"] = True
+        milestones["revelation"] = max(int(milestones["revelation"]), 2)
+        reveal("jade_mountain_fell")
+
+    if hot_button == "master_past" or "that night" in text:
+        milestones["revelation"] = max(int(milestones["revelation"]), 3)
+        reveal("liang_survivor_guilt")
+
+    if hot_button == "betrayal" or "hiding" in text or "traitor" in text:
+        memory["accused_liang"] = True
+        milestones["betrayal"] = max(int(milestones["betrayal"]), 2)
+        reveal("inside_betrayal")
+        note("The player has pressed on betrayal; Liang should become careful and specific.")
+
+    if hot_button == "demon_sect":
+        memory["mentioned_demon_sect"] = True
+        milestones["betrayal"] = max(int(milestones["betrayal"]), 1)
+        note("The Demon Sect has entered the conversation; suspicion should rise.")
+
+    if discourse_act in {"challenge", "threaten"} or "draw your blade" in text:
+        memory["challenged_liang"] = True
+        memory["liang_warned_player"] = True
+        milestones["duel"] = max(int(milestones["duel"]), 1)
+        note("The player challenged Liang; he should warn before escalating to steel.")
+
+    if discourse_act == "apologize" and (memory.get("challenged_liang") or state.get("mood") == "hostile" or int(state.get("tension", 35)) >= 50):
+        memory["apologized_after_hostility"] = True
+        milestones["alliance"] = max(int(milestones["alliance"]), 1)
+        note("The player apologized after drawing tension; Liang should acknowledge the repair attempt.")
+
+    if discourse_act in {"praise", "compliment_skill"} or trust_delta >= 10:
+        milestones["alliance"] = max(int(milestones["alliance"]), 1)
+
+    if _is_silence_move(player_input):
+        memory["stayed_silent_count"] = int(memory.get("stayed_silent_count", 0)) + 1
+        if int(memory["stayed_silent_count"]) >= 2:
+            memory["tested_by_silence"] = True
+            note("The player has chosen silence repeatedly; Liang should test what the silence hides.")
+
+    if milestones["revelation"] >= 1:
+        memory["earned_first_truth"] = True
+
+    return {
+        "memory_flags": memory,
+        "route_milestones": milestones,
+        "known_truths": known_truths[:6],
+        "dramatic_notes": dramatic_notes[-8:],
+    }
+
 
 def detect_hot_button(player_input: str) -> str:
     text = player_input.lower()
@@ -424,6 +567,7 @@ def update_state(state: dict, discourse_act: str, player_input: str) -> dict:
         trust_delta += 8
 
     trust = max(0, min(100, trust + trust_delta))
+    story_spine = update_story_spine(state, discourse_act, player_input, hot_button, trust_delta)
     social = update_social_games(state, discourse_act, hot_button, trust_delta)
     current_beat_obj = BEATS.get(current_beat, BEATS["intro"])
 
@@ -461,6 +605,7 @@ def update_state(state: dict, discourse_act: str, player_input: str) -> dict:
         "mix_in": MIX_IN_LABELS.get(hot_button, "Main beat continues"),
         "beat_goal": BEAT_GOALS.get(current_beat, "Main beat continues"),
         **social,
+        **story_spine,
     }
 
 
@@ -497,6 +642,45 @@ BEAT_NUDGES: dict[str, str] = {
 }
 
 
+def _format_story_spine_prompt(state: dict) -> str:
+    known_truths = list(state.get("known_truths", []))
+    milestones = {**default_route_milestones(), **dict(state.get("route_milestones", {}))}
+    memory_flags = dict(state.get("memory_flags", {}))
+    dramatic_notes = list(state.get("dramatic_notes", []))
+
+    if not known_truths and not any(milestones.values()) and not dramatic_notes:
+        return ""
+
+    sections = ["STORY SPINE:"]
+    if known_truths:
+        truth_lines = "\n".join(f"- {truth}" for truth in known_truths)
+        sections.append(f"REVEALED CANON TRUTHS:\n{truth_lines}")
+
+    active_milestones: list[str] = []
+    for route, index in milestones.items():
+        if index <= 0:
+            continue
+        labels = ROUTE_MILESTONE_LABELS.get(route, [])
+        label = labels[min(index, len(labels)) - 1] if labels else f"{route} route milestone {index}"
+        active_milestones.append(f"- {label}")
+    if active_milestones:
+        sections.append("CURRENT ROUTE MILESTONES:\n" + "\n".join(active_milestones))
+
+    true_flags = []
+    for key, value in sorted(memory_flags.items()):
+        if value is True or (isinstance(value, int) and value > 0):
+            true_flags.append(f"- {key}: {value}")
+    if true_flags:
+        sections.append("PLAYER MEMORY FLAGS:\n" + "\n".join(true_flags))
+
+    if dramatic_notes:
+        sections.append("DRAMATIC NOTES:\n" + "\n".join(f"- {note}" for note in dramatic_notes[-5:]))
+
+    sections.append("Use the story spine to make consequences specific. Do not reveal unrevealed canon truths early.")
+    return "\n\n".join(sections)
+
+
+
 def get_system_prompt(state: dict) -> str:
     """Build the LLM system prompt from current emotional state and story beat."""
     beat = BEATS.get(state["current_beat"], BEATS["intro"])
@@ -506,6 +690,8 @@ def get_system_prompt(state: dict) -> str:
     nudge = BEAT_NUDGES.get(state["current_beat"], "")
     beat_goal = state.get("beat_goal", BEAT_GOALS.get(state["current_beat"], "Main beat continues"))
     mix_in = state.get("mix_in", "Main beat continues")
+    story_spine = _format_story_spine_prompt(state)
+    story_spine_section = f"\n\n{story_spine}" if story_spine else ""
 
     return f"""You are Master Liang, the last swordsman of the Jade Mountain Sect. You speak with quiet weight, every word chosen carefully, like a sword drawn from its scabbard.
 
@@ -523,7 +709,7 @@ MIX-IN / HOT BUTTON: {mix_in}
 SOCIAL GAMES:
 - Affinity: {state.get("affinity", 0)}/100
 - Self-realization: {state.get("self_realization", 0)}/100
-- Tension: {state.get("tension", 35)}/100
+- Tension: {state.get("tension", 35)}/100{story_spine_section}
 
 RULES:
 - Respond in 1-3 sentences maximum. Be concise.
@@ -572,6 +758,10 @@ def get_trace_entry(session_id: str, player_input: str, state: dict, npc_respons
         "hot_button": state.get("hot_button", "none"),
         "mix_in": state.get("mix_in", "Main beat continues"),
         "beat_goal": state.get("beat_goal", BEAT_GOALS.get(state["current_beat"], "Main beat continues")),
+        "memory_flags": state.get("memory_flags", default_memory_flags()),
+        "route_milestones": state.get("route_milestones", default_route_milestones()),
+        "known_truths": state.get("known_truths", []),
+        "dramatic_notes": state.get("dramatic_notes", []),
         "npc_response": npc_response,
         "is_terminal": is_game_over(state),
     }
