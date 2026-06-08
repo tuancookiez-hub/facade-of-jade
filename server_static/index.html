@@ -38,8 +38,16 @@
           <div><dt>Mood shift</dt><dd id="mood-shift">wary → wary</dd></div>
           <div><dt>Trust</dt><dd><span id="trust">15</span>% <span id="trust-delta" class="delta">+0</span></dd></div>
           <div><dt>Last act</dt><dd id="last-act">none</dd></div>
+          <div><dt>Hot button</dt><dd id="hot-button">none</dd></div>
+          <div><dt>Beat goal</dt><dd id="beat-goal">test visitor</dd></div>
         </dl>
         <div class="meter"><span id="trust-meter" style="width:15%"></span></div>
+        <div class="paths social-games" aria-label="Social games">
+          <p class="path-title">Social games</p>
+          <div><span>Affinity</span><meter id="social-affinity" min="0" max="100" value="0"></meter></div>
+          <div><span>Therapy</span><meter id="social-realization" min="0" max="100" value="0"></meter></div>
+          <div><span>Tension</span><meter id="social-tension" min="0" max="100" value="35"></meter></div>
+        </div>
         <div class="paths" aria-label="Path pressure">
           <p class="path-title">Path pressure</p>
           <div><span>Revelation</span><meter id="path-revelation" min="0" max="100" value="15"></meter></div>
@@ -47,7 +55,8 @@
           <div><span>Duel</span><meter id="path-duel" min="0" max="100" value="85"></meter></div>
           <div><span>Betrayal</span><meter id="path-betrayal" min="0" max="100" value="65"></meter></div>
         </div>
-        <p class="director-note">The hidden director classifies your speech, updates state, then rewrites the model prompt.</p>
+        <p id="mix-in" class="director-note">Main beat continues.</p>
+        <p class="director-note">Inspired by Façade: discourse acts, beat goals, hot-button mix-ins, social games, and endings.</p>
       </aside>
     </section>
 

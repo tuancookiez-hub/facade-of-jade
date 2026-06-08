@@ -336,6 +336,71 @@ TRUST_DELTAS: dict[str, int] = {
 }
 
 
+HOT_BUTTON_TOPICS: dict[str, list[str]] = {
+    "jade_seal": ["jade seal", "seal", "artifact", "relic"],
+    "demon_sect": ["demon sect", "sect", "cult", "allegiance"],
+    "jade_mountain": ["jade mountain", "mountain", "temple", "sect destroyed"],
+    "betrayal": ["betray", "betrayal", "traitor", "spy", "deceive", "lied"],
+    "master_past": ["past", "secret", "truth", "what happened", "confess"],
+}
+
+BEAT_GOALS: dict[str, str] = {
+    "intro": "Transition-in: test the visitor and establish suspicion.",
+    "revelation": "Body goal: reveal one painful truth without surrendering control.",
+    "conflict": "Hot-button mix-in: confront possible Demon Sect ties.",
+    "duel": "Terminal pressure: force honor through challenge.",
+    "alliance": "Transition-out: accept the player as an ally if trust holds.",
+    "betrayal": "Terminal pressure: eject the player after deception is exposed.",
+    "ending_honor": "Ending: alliance and inheritance of the Jade Mountain legacy.",
+    "ending_betrayal": "Ending: broken trust and permanent dismissal.",
+    "ending_duel": "Ending: the social game collapses into blades.",
+}
+
+MIX_IN_LABELS: dict[str, str] = {
+    "jade_seal": "Object hot-button: jade seal",
+    "demon_sect": "Danger hot-button: Demon Sect",
+    "jade_mountain": "Lore hot-button: Jade Mountain",
+    "betrayal": "Trust hot-button: betrayal",
+    "master_past": "Therapy-game pressure: painful past",
+    "none": "Main beat continues",
+}
+
+
+def detect_hot_button(player_input: str) -> str:
+    text = player_input.lower()
+    for topic, keywords in HOT_BUTTON_TOPICS.items():
+        if any(keyword in text for keyword in keywords):
+            return topic
+    return "none"
+
+
+def update_social_games(state: dict, discourse_act: str, hot_button: str, trust_delta: int) -> dict[str, int]:
+    affinity = int(state.get("affinity", 0))
+    self_realization = int(state.get("self_realization", 0))
+    tension = int(state.get("tension", 35))
+
+    if discourse_act in {"praise", "compliment_skill", "apologize", "share_secret"}:
+        affinity += 10
+    if discourse_act in {"ask_question", "share_secret"} or hot_button in {"jade_mountain", "master_past", "jade_seal"}:
+        self_realization += 12
+    if discourse_act in {"insult", "mock", "threaten", "challenge"}:
+        tension += 18
+    if hot_button in {"demon_sect", "betrayal"}:
+        tension += 15
+    if discourse_act == "apologize":
+        tension -= 10
+    if trust_delta >= 10:
+        affinity += 4
+    if trust_delta <= -10:
+        tension += 8
+
+    return {
+        "affinity": max(0, min(100, affinity)),
+        "self_realization": max(0, min(100, self_realization)),
+        "tension": max(0, min(100, tension)),
+    }
+
+
 def update_state(state: dict, discourse_act: str, player_input: str) -> dict:
     """Update the emotional state and advance beats when preconditions match."""
     mood = state.get("mood", "wary")
@@ -343,6 +408,7 @@ def update_state(state: dict, discourse_act: str, player_input: str) -> dict:
     current_beat = state.get("current_beat", "intro")
     player_challenged = state.get("player_challenged", False)
     turns = state.get("turns", 0) + 1
+    hot_button = detect_hot_button(player_input)
 
     if discourse_act == "challenge" or any(
         word in player_input.lower() for word in ("duel", "fight me", "challenge you")
@@ -358,6 +424,7 @@ def update_state(state: dict, discourse_act: str, player_input: str) -> dict:
         trust_delta += 8
 
     trust = max(0, min(100, trust + trust_delta))
+    social = update_social_games(state, discourse_act, hot_button, trust_delta)
     current_beat_obj = BEATS.get(current_beat, BEATS["intro"])
 
     if not current_beat_obj.is_terminal:
@@ -369,9 +436,19 @@ def update_state(state: dict, discourse_act: str, player_input: str) -> dict:
                 "current_beat": current_beat,
                 "player_challenged": player_challenged,
                 "turns": turns,
+                **social,
+                "hot_button": hot_button,
             }):
                 current_beat = target_id
                 break
+
+    if not BEATS.get(current_beat, BEATS["intro"]).is_terminal:
+        if social["affinity"] >= 72 and social["self_realization"] >= 45 and trust >= 65:
+            current_beat = "ending_honor"
+        elif social["tension"] >= 88 and player_challenged:
+            current_beat = "ending_duel"
+        elif social["tension"] >= 82 and trust <= 12 and turns >= 4:
+            current_beat = "ending_betrayal"
 
     return {
         "mood": new_mood,
@@ -380,6 +457,10 @@ def update_state(state: dict, discourse_act: str, player_input: str) -> dict:
         "player_challenged": player_challenged,
         "discourse_act": discourse_act,
         "turns": turns,
+        "hot_button": hot_button,
+        "mix_in": MIX_IN_LABELS.get(hot_button, "Main beat continues"),
+        "beat_goal": BEAT_GOALS.get(current_beat, "Main beat continues"),
+        **social,
     }
 
 
@@ -423,6 +504,8 @@ def get_system_prompt(state: dict) -> str:
     trust = state.get("trust", 0)
     voice = MOOD_VOICE_GUIDE.get(mood, MOOD_VOICE_GUIDE["wary"])
     nudge = BEAT_NUDGES.get(state["current_beat"], "")
+    beat_goal = state.get("beat_goal", BEAT_GOALS.get(state["current_beat"], "Main beat continues"))
+    mix_in = state.get("mix_in", "Main beat continues")
 
     return f"""You are Master Liang, the last swordsman of the Jade Mountain Sect. You speak with quiet weight, every word chosen carefully, like a sword drawn from its scabbard.
 
@@ -435,6 +518,12 @@ YOUR EMOTIONAL STATE:
 - Voice: {voice}
 
 STORY DIRECTION: {nudge}
+BEAT GOAL: {beat_goal}
+MIX-IN / HOT BUTTON: {mix_in}
+SOCIAL GAMES:
+- Affinity: {state.get("affinity", 0)}/100
+- Self-realization: {state.get("self_realization", 0)}/100
+- Tension: {state.get("tension", 35)}/100
 
 RULES:
 - Respond in 1-3 sentences maximum. Be concise.
@@ -457,7 +546,8 @@ def format_state_for_display(state: dict) -> str:
     turn = int(state.get("turns", 0))
     return (
         f"**{beat.name}** | Turn: {turn} | Mood: {mood} | "
-        f"Trust: [{trust_bar}] {trust}% | Last act: {act}"
+        f"Trust: [{trust_bar}] {trust}% | Last act: {act} | "
+        f"Tension: {int(state.get('tension', 35))}%"
     )
 
 
@@ -476,6 +566,12 @@ def get_trace_entry(session_id: str, player_input: str, state: dict, npc_respons
         "mood": state["mood"],
         "trust": state["trust"],
         "current_beat": state["current_beat"],
+        "affinity": state.get("affinity", 0),
+        "self_realization": state.get("self_realization", 0),
+        "tension": state.get("tension", 35),
+        "hot_button": state.get("hot_button", "none"),
+        "mix_in": state.get("mix_in", "Main beat continues"),
+        "beat_goal": state.get("beat_goal", BEAT_GOALS.get(state["current_beat"], "Main beat continues")),
         "npc_response": npc_response,
         "is_terminal": is_game_over(state),
     }
@@ -505,4 +601,10 @@ if __name__ == "__main__":
     s = _initial_state()
     s = update_state(s, classify_discourse_act("Hello, Master Liang."), "Hello, Master Liang.")
     assert s["current_beat"] == "intro", f"neutral greeting triggered wrong beat: {s['current_beat']}"
+    # 6. Façade-inspired social games should track hot-button and mix-in metadata
+    s = _initial_state()
+    s = update_state(s, classify_discourse_act("What happened to the jade seal?"), "What happened to the jade seal?")
+    assert s["hot_button"] == "jade_seal"
+    assert s["self_realization"] > 0
+    assert "beat_goal" in s and "mix_in" in s
     print("all tests passed")

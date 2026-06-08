@@ -26,6 +26,12 @@ function updateState(state) {
   document.querySelector('#mood-shift').textContent = `${state.previous_mood || state.mood} → ${state.mood}`;
   document.querySelector('#trust').textContent = state.trust ?? 0;
   document.querySelector('#last-act').textContent = prettify(state.last_act || 'none');
+  document.querySelector('#hot-button').textContent = prettify(state.hot_button || 'none');
+  document.querySelector('#beat-goal').textContent = state.beat_goal || 'Main beat continues';
+  document.querySelector('#mix-in').textContent = state.mix_in || 'Main beat continues';
+  setMeter('#social-affinity', state.affinity ?? 0);
+  setMeter('#social-realization', state.self_realization ?? 0);
+  setMeter('#social-tension', state.tension ?? 35);
   const delta = Number(state.trust_delta || 0);
   const deltaEl = document.querySelector('#trust-delta');
   deltaEl.textContent = `${delta >= 0 ? '+' : ''}${delta}`;

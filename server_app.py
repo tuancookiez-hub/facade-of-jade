@@ -49,6 +49,12 @@ def initial_state() -> dict[str, Any]:
         "previous_mood": "wary",
         "previous_trust": 15,
         "trust_delta": 0,
+        "affinity": 0,
+        "self_realization": 0,
+        "tension": 35,
+        "hot_button": "none",
+        "mix_in": "Main beat continues",
+        "beat_goal": "Transition-in: test the visitor and establish suspicion.",
     }
 
 
@@ -84,6 +90,12 @@ def describe_state(state: dict[str, Any]) -> dict[str, Any]:
         "turns": int(state.get("turns", 0)),
         "game_over": is_game_over(state),
         "path_pressure": path_pressure(state),
+        "affinity": int(state.get("affinity", 0)),
+        "self_realization": int(state.get("self_realization", 0)),
+        "tension": int(state.get("tension", 35)),
+        "hot_button": state.get("hot_button", "none"),
+        "mix_in": state.get("mix_in", "Main beat continues"),
+        "beat_goal": state.get("beat_goal", "Main beat continues"),
     }
 
 
@@ -116,7 +128,13 @@ def record_turn(sid: str, message: str, next_state: dict[str, Any], response_tex
             "previous_trust": previous_trust,
             "trust_delta": next_state["trust_delta"],
             "path_pressure": path_pressure(next_state),
-            "source": "gr-server-spike",
+            "affinity": next_state.get("affinity", 0),
+            "self_realization": next_state.get("self_realization", 0),
+            "tension": next_state.get("tension", 35),
+            "hot_button": next_state.get("hot_button", "none"),
+            "mix_in": next_state.get("mix_in", "Main beat continues"),
+            "beat_goal": next_state.get("beat_goal", "Main beat continues"),
+            "source": "gr-server-production",
         }
     )
     TRACE_LOG.append(trace)
