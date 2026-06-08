@@ -49,4 +49,5 @@ def test_static_frontend_uses_streaming_endpoint_and_path_pressure() -> None:
     assert "path-revelation" in html
     assert "/api/chat_stream" in js
     assert "getReader" in js
+    assert "buffer.split('\\n')" in js
     assert ".paths" in css
