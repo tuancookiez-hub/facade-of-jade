@@ -45,9 +45,9 @@ def test_static_frontend_uses_streaming_endpoint_and_path_pressure() -> None:
     html = (ROOT / "server_static" / "index.html").read_text(encoding="utf-8")
     js = (ROOT / "server_static" / "app.js").read_text(encoding="utf-8")
     css = (ROOT / "server_static" / "style.css").read_text(encoding="utf-8")
-    assert "Drama Engine" in html
+    assert "Story engine details" in html
     assert "path-revelation" in html
     assert "/api/chat_stream" in js
     assert "getReader" in js
     assert "buffer.split('\\n')" in js
-    assert ".paths" in css
+    assert ".meters" in css

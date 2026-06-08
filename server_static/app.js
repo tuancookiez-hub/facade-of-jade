@@ -77,7 +77,8 @@ function updateState(state) {
   const deltaEl = document.querySelector('#trust-delta');
   deltaEl.textContent = `${delta >= 0 ? '+' : ''}${delta}`;
   deltaEl.classList.toggle('negative', delta < 0);
-  document.querySelector('#trust-meter').style.width = `${Math.max(0, Math.min(100, state.trust || 0))}%`;
+  const trustMeter = document.querySelector('#trust-meter');
+  if (trustMeter) trustMeter.style.width = `${Math.max(0, Math.min(100, state.trust || 0))}%`;
 
   const pressure = state.path_pressure || {};
   setMeter('#path-revelation', pressure.revelation ?? 0);

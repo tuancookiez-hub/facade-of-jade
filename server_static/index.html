@@ -10,117 +10,110 @@
   <link rel="stylesheet" href="/server_static/style.css" />
 </head>
 <body>
-  <main class="shell" aria-label="Facade of Jade game interface">
-    <section class="brand-panel" aria-label="Game identity">
+  <main class="novel-shell" aria-label="Facade of Jade interactive novel">
+    <header class="novel-masthead" aria-label="Game identity">
       <div class="seal-mark" aria-hidden="true">梁</div>
-      <p class="micro-title">A Tiny Titan Drama Engine</p>
-      <div class="title-rule"></div>
-      <h1>Facade<br />of Jade</h1>
-      <p class="intro">A rain-dark teahouse. A swordsman with one hand on his blade. Your wording changes his trust, mood, and story path.</p>
-      <div class="left-log" aria-label="Recent dialogue">
-        <p class="panel-label">Recent exchange</p>
-        <div id="messages" class="messages">
+      <div>
+        <p class="micro-title">A Tiny Titan Drama Engine</p>
+        <h1>Facade of Jade</h1>
+      </div>
+      <button id="reset-button" class="reset-link" type="button" title="Reset story" aria-label="Reset story">Begin again</button>
+    </header>
+
+    <section class="hero-scene" aria-label="Story scene">
+      <div class="scene-art" aria-hidden="true">
+        <div class="paper-grain"></div>
+        <div class="mist mist-a"></div>
+        <div class="mist mist-b"></div>
+        <div class="moon"></div>
+        <div class="distant-ridge ridge-a"></div>
+        <div class="distant-ridge ridge-b"></div>
+        <div class="teahouse">
+          <div class="roof roof-high"></div>
+          <div class="roof roof-low"></div>
+          <div class="house-body"></div>
+          <div class="screen screen-left"></div>
+          <div class="screen screen-right"></div>
+          <div class="lantern">梁</div>
+        </div>
+        <div class="rain rain-a"></div>
+        <div class="rain rain-b"></div>
+        <div class="bamboo bamboo-left"></div>
+        <div class="bamboo bamboo-right"></div>
+        <div class="master-liang">
+          <div class="topknot"></div>
+          <div class="head"></div>
+          <div class="shoulders"></div>
+          <div class="robe"></div>
+          <div class="sleeve"></div>
+          <div class="sword"></div>
+        </div>
+      </div>
+
+      <aside class="metadata-ribbon" aria-label="Story metadata">
+        <span><b>Mood</b> <i id="mood-dot" class="mood-dot mood-wary"></i><em id="mood">wary</em></span>
+        <span><b>Trust</b> <em><span id="trust">15</span>%</em> <small id="trust-delta" class="delta">+0</small></span>
+        <span><b>Path</b> <em id="beat">Intro</em></span>
+        <span class="soft"><b>Turn</b> <em id="turns">0</em></span>
+      </aside>
+
+      <section class="story-glass" aria-label="Dialogue and choices">
+        <p class="scene-kicker"><span id="last-act">None</span> · <span id="mood-shift">wary → wary</span></p>
+        <article class="quote-card" aria-live="polite">
+          <p id="current-quote" class="current-quote">The tea has cooled, yet you remain. Speak carefully.</p>
+          <p class="speaker"><span></span>Master Liang</p>
+        </article>
+
+        <div id="messages" class="messages" aria-label="Conversation log">
           <div class="message assistant">
             <span class="message-meta"><b>Master Liang</b><time>Now</time></span>
             <span class="message-text">The tea has cooled, yet you remain. Speak carefully.</span>
           </div>
         </div>
-      </div>
-    </section>
 
-    <section class="stage-panel" aria-label="Narrative stage">
-      <div class="ink-scene" aria-hidden="true">
-        <div class="paper-grain"></div>
-        <div class="moon"></div>
-        <div class="mountain mountain-a"></div>
-        <div class="mountain mountain-b"></div>
-        <div class="tree"><span></span></div>
-        <div class="pagoda">
-          <div class="roof roof-top"></div>
-          <div class="roof roof-mid"></div>
-          <div class="pagoda-body"></div>
-          <div class="lantern">梁</div>
-        </div>
-        <div class="master-silhouette">
-          <div class="head"></div>
-          <div class="topknot"></div>
-          <div class="robe"></div>
-          <div class="blade"></div>
-        </div>
-      </div>
-
-      <article class="quote-card" aria-live="polite">
-        <p id="current-quote" class="current-quote">The tea has cooled, yet you remain. Speak carefully.</p>
-        <p class="speaker"><span></span>Master Liang</p>
-      </article>
-
-      <section class="input-stack" aria-label="Player input">
-        <form id="chat-form" class="chat-form">
+        <form id="chat-form" class="chat-form" aria-label="Speak to Master Liang">
           <input id="player-input" autocomplete="off" placeholder="What do you say or do?" />
           <button id="send-button" class="send-button" type="submit" aria-label="Speak">→</button>
         </form>
-        <p class="hints">Hints: Ask about his past • Offer respect • Challenge his view • Share a secret</p>
         <p id="status" class="status">Ready.</p>
+
+        <section class="action-row" aria-label="Suggested continuations">
+          <button class="action-card" data-prompt="Master Liang, I bow before your blade and ask for guidance.">
+            <b>Offer respect</b><small>Lower tension. Invite trust.</small>
+          </button>
+          <button class="action-card" data-prompt="What happened at Jade Mountain? Tell me the truth.">
+            <b>Ask the wound</b><small>Pull the past into the room.</small>
+          </button>
+          <button class="action-card" data-prompt="You hide behind old stories because you fear the truth.">
+            <b>Touch the nerve</b><small>Risk anger for revelation.</small>
+          </button>
+          <button class="action-card" data-prompt="I challenge your judgment — the seal belongs to the people.">
+            <b>Draw the blade</b><small>Force the story toward conflict.</small>
+          </button>
+        </section>
       </section>
     </section>
 
-    <aside class="status-panel" aria-label="Drama status">
-      <div class="status-head">
-        <p class="panel-label">Status</p>
-        <button id="reset-button" class="icon-button" type="button" title="Reset story" aria-label="Reset story">↺</button>
-      </div>
-
-      <h2 id="beat">The Teahouse</h2>
-      <dl class="status-list">
-        <div><dt>Turn</dt><dd id="turns">0</dd></div>
-        <div><dt>Mood</dt><dd><span id="mood-dot" class="mood-dot mood-wary"></span><span id="mood">wary</span></dd></div>
-        <div><dt>Mood shift</dt><dd id="mood-shift">wary → wary</dd></div>
-        <div><dt>Trust</dt><dd><span id="trust">15</span>% <span id="trust-delta" class="delta">+0</span></dd></div>
-        <div><dt>Last act</dt><dd id="last-act">none</dd></div>
-      </dl>
-      <div class="trust-track" aria-label="Trust meter"><span id="trust-meter" style="width:15%"></span></div>
-
-      <section class="paths" aria-label="Path pressure">
-        <div class="section-title-row">
-          <p class="path-title">Path pressure</p>
-          <span aria-hidden="true">ⓘ</span>
-        </div>
-        <label><span>Revelation</span><meter id="path-revelation" min="0" max="100" value="15"></meter></label>
-        <label><span>Alliance</span><meter id="path-alliance" min="0" max="100" value="5"></meter></label>
-        <label><span>Duel</span><meter id="path-duel" min="0" max="100" value="85"></meter></label>
-        <label><span>Betrayal</span><meter id="path-betrayal" min="0" max="100" value="65"></meter></label>
-        <p class="status-help">Path Pressure reflects the story direction's pull based on your choices.</p>
-      </section>
-
-      <button id="insights-toggle" class="insights-toggle" type="button" aria-expanded="false" aria-controls="insights-panel">View insights <span>⌄</span></button>
-      <section id="insights-panel" class="insights-panel" hidden>
-        <dl class="status-list compact">
+    <section class="insights-drawer" aria-label="Drama engine insights">
+      <button id="insights-toggle" class="insights-toggle" type="button" aria-expanded="false" aria-controls="insights-panel">
+        Story engine details <span>⌄</span>
+      </button>
+      <div id="insights-panel" class="insights-panel" hidden>
+        <dl class="insight-grid">
           <div><dt>Hot button</dt><dd id="hot-button">none</dd></div>
           <div><dt>Beat goal</dt><dd id="beat-goal">Transition-in: test the visitor and establish suspicion.</dd></div>
           <div><dt>Mix-in</dt><dd id="mix-in">Main beat continues.</dd></div>
         </dl>
-        <div class="paths social-games" aria-label="Social games">
-          <p class="path-title">Social games</p>
+        <div class="meters" aria-label="Path pressure and social games">
+          <label><span>Revelation</span><meter id="path-revelation" min="0" max="100" value="15"></meter></label>
+          <label><span>Alliance</span><meter id="path-alliance" min="0" max="100" value="5"></meter></label>
+          <label><span>Duel</span><meter id="path-duel" min="0" max="100" value="85"></meter></label>
+          <label><span>Betrayal</span><meter id="path-betrayal" min="0" max="100" value="65"></meter></label>
           <label><span>Affinity</span><meter id="social-affinity" min="0" max="100" value="0"></meter></label>
           <label><span>Therapy</span><meter id="social-realization" min="0" max="100" value="0"></meter></label>
           <label><span>Tension</span><meter id="social-tension" min="0" max="100" value="35"></meter></label>
         </div>
-      </section>
-    </aside>
-
-    <section class="action-row" aria-label="Suggested approaches">
-      <button class="action-card" data-prompt="Master Liang, I bow before your blade and ask for guidance.">
-        <span class="action-icon">❦</span><span><b>Respect</b><small>Lower tension, increase trust.</small></span><i>→</i>
-      </button>
-      <button class="action-card" data-prompt="What happened at Jade Mountain? Tell me the truth.">
-        <span class="action-icon">?</span><span><b>Question</b><small>Seek truth, gain insight.</small></span><i>→</i>
-      </button>
-      <button class="action-card" data-prompt="You hide behind old stories because you fear the truth.">
-        <span class="action-icon">⚔</span><span><b>Provoke</b><small>Increase tension, risk a duel.</small></span><i>→</i>
-      </button>
-      <button class="action-card" data-prompt="I challenge your judgment — the seal belongs to the people.">
-        <span class="action-icon">♛</span><span><b>Challenge</b><small>Test his limits, court danger.</small></span><i>→</i>
-      </button>
+      </div>
     </section>
   </main>
   <script src="/server_static/app.js"></script>
