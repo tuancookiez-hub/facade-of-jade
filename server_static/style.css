@@ -554,7 +554,7 @@ h1 {
 .dialogue-stage {
   position: absolute;
   left: 50%;
-  top: 55%;
+  top: 47%;
   transform: translate(-50%, -50%);
   width: min(680px, 54vw);
   pointer-events: auto;
@@ -575,11 +575,17 @@ h1 {
 .dialogue-box {
   position: relative;
   padding: clamp(20px, 3vw, 34px) clamp(28px, 4vw, 54px);
+  max-height: min(34vh, 300px);
+  overflow-y: auto;
   border: 1px solid rgba(244,234,215,0.10);
   background: rgba(5, 7, 10, 0.84);
   box-shadow: 0 22px 70px rgba(0,0,0,0.54);
   backdrop-filter: blur(10px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(244,234,215,0.35) transparent;
 }
+.dialogue-box::-webkit-scrollbar { width: 5px; }
+.dialogue-box::-webkit-scrollbar-thumb { background: rgba(244,234,215,0.32); }
 .current-quote {
   margin: 0;
   font-family: "Crimson Text", Georgia, serif;
@@ -590,11 +596,13 @@ h1 {
   text-shadow: 0 3px 10px rgba(0,0,0,0.84);
 }
 .messages {
-  margin-top: 10px;
-  max-height: 92px;
+  max-height: 190px;
   overflow-y: auto;
   text-align: left;
-  opacity: 0.92;
+  padding: 10px;
+  border: 1px solid rgba(244,234,215,0.10);
+  background: rgba(255,255,255,0.03);
+  opacity: 1;
   scrollbar-width: thin;
   scrollbar-color: rgba(244,234,215,0.35) transparent;
 }
@@ -715,6 +723,15 @@ h1 {
 .insight-summary,
 .insight-grid,
 .meters { display: grid; gap: 10px; }
+.history-panel { margin: 0 0 14px; }
+.history-panel h2 {
+  margin: 0 0 8px;
+  color: rgba(244,234,215,0.56);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
 .insight-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 14px; }
 .insight-summary span,
 .insight-grid div { padding: 10px; border: 1px solid rgba(244,234,215,0.10); background: rgba(255,255,255,0.03); }
@@ -739,7 +756,7 @@ meter::-moz-meter-bar { background: linear-gradient(90deg, #6f8f7f, #b5d2aa); }
   .left-wall, .right-wall { width: 16%; opacity: 0.76; }
   .window-wall { left: 12%; right: 12%; }
   .master-liang { width: 320px; height: 450px; }
-  .dialogue-stage { width: min(760px, calc(100vw - 44px)); top: 53%; }
+  .dialogue-stage { width: min(760px, calc(100vw - 44px)); top: 46%; }
   .insights-hud { top: 92px; width: 220px; }
   .action-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tea-table { left: 3%; right: 3%; }
@@ -759,7 +776,7 @@ meter::-moz-meter-bar { background: linear-gradient(90deg, #6f8f7f, #b5d2aa); }
   .master-liang { bottom: 32%; width: 250px; height: 360px; }
   .tea-table { height: 28%; bottom: 18%; }
   .player-hands { bottom: 17%; height: 18%; }
-  .dialogue-stage { top: 57%; width: calc(100vw - 28px); }
+  .dialogue-stage { top: 46%; width: calc(100vw - 28px); }
   .current-quote { font-size: 1.55rem; }
   .messages { max-height: 76px; }
   .input-stage { left: 14px; right: 14px; bottom: 14px; }

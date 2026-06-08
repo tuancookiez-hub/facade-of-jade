@@ -80,12 +80,6 @@
         <article class="dialogue-box" aria-live="polite">
           <p id="current-quote" class="current-quote">The tea has cooled, yet you remain.</p>
         </article>
-        <div id="messages" class="messages" aria-label="Conversation log">
-          <div class="message assistant">
-            <span class="message-meta"><b>Master Liang</b><time>Now</time></span>
-            <span class="message-text">The tea has cooled, yet you remain.</span>
-          </div>
-        </div>
       </section>
 
       <section class="input-stage" aria-label="Player actions">
@@ -109,6 +103,15 @@
           <span><b>Last act</b><em id="last-act">None</em></span>
           <span><b>Mood shift</b><em id="mood-shift">wary → wary</em></span>
         </div>
+        <section class="history-panel" aria-label="Conversation history">
+          <h2>Conversation History</h2>
+          <div id="messages" class="messages" aria-label="Conversation log">
+            <div class="message assistant">
+              <span class="message-meta"><b>Master Liang</b><time>Now</time></span>
+              <span class="message-text">The tea has cooled, yet you remain.</span>
+            </div>
+          </div>
+        </section>
         <dl class="insight-grid">
           <div><dt>Hot button</dt><dd id="hot-button">none</dd></div>
           <div><dt>Beat goal</dt><dd id="beat-goal">Transition-in: test the visitor and establish suspicion.</dd></div>
