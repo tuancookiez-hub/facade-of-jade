@@ -9,13 +9,14 @@ let sessionId = localStorage.getItem('foj-session-id') || crypto.randomUUID();
 localStorage.setItem('foj-session-id', sessionId);
 let history = [];
 
-function addMessage(role, text) {
+function addMessage(role, text, record = true) {
   const div = document.createElement('div');
   div.className = `message ${role}`;
   div.textContent = text;
   messagesEl.appendChild(div);
   messagesEl.scrollTop = messagesEl.scrollHeight;
-  history.push({ role: role === 'user' ? 'user' : 'assistant', content: text });
+  if (record) history.push({ role: role === 'user' ? 'user' : 'assistant', content: text });
+  return div;
 }
 
 function updateState(state) {
@@ -30,6 +31,16 @@ function updateState(state) {
   deltaEl.textContent = `${delta >= 0 ? '+' : ''}${delta}`;
   deltaEl.classList.toggle('negative', delta < 0);
   document.querySelector('#trust-meter').style.width = `${Math.max(0, Math.min(100, state.trust || 0))}%`;
+  const pressure = state.path_pressure || {};
+  setMeter('#path-revelation', pressure.revelation ?? 0);
+  setMeter('#path-alliance', pressure.alliance ?? 0);
+  setMeter('#path-duel', pressure.duel ?? 0);
+  setMeter('#path-betrayal', pressure.betrayal ?? 0);
+}
+
+function setMeter(selector, value) {
+  const el = document.querySelector(selector);
+  if (el) el.value = Math.max(0, Math.min(100, Number(value || 0)));
 }
 
 function prettify(value) {
@@ -42,21 +53,53 @@ async function sendMessage(text) {
   input.value = '';
   sendButton.disabled = true;
   statusEl.textContent = 'Master Liang is weighing your words...';
+  const assistantEl = addMessage('assistant', '', false);
+  let responseText = '';
   try {
-    const res = await fetch('/api/chat', {
+    const res = await fetch('/api/chat_stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ session_id: sessionId, message: text, history: history.slice(-10) })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || res.statusText);
-    sessionId = data.session_id;
-    localStorage.setItem('foj-session-id', sessionId);
-    addMessage('assistant', data.response || '(silence)');
-    updateState(data.state);
-    statusEl.textContent = data.state?.game_over ? 'The story has ended.' : 'Ready.';
+    if (!res.ok || !res.body) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || res.statusText);
+    }
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('
+');
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const event = JSON.parse(line);
+        if (event.type === 'state') {
+          sessionId = event.session_id || sessionId;
+          localStorage.setItem('foj-session-id', sessionId);
+          updateState(event.state);
+        } else if (event.type === 'token') {
+          responseText += event.token || '';
+          assistantEl.textContent = responseText;
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        } else if (event.type === 'done') {
+          sessionId = event.session_id || sessionId;
+          localStorage.setItem('foj-session-id', sessionId);
+          responseText = event.response || responseText;
+          assistantEl.textContent = responseText || '(silence)';
+          updateState(event.state);
+          history.push({ role: 'assistant', content: assistantEl.textContent });
+          statusEl.textContent = event.state?.game_over ? 'The story has ended.' : 'Ready.';
+        }
+      }
+    }
   } catch (err) {
-    addMessage('assistant', `The teahouse falls silent. ${err.message}`);
+    assistantEl.textContent = `The teahouse falls silent. ${err.message}`;
+    history.push({ role: 'assistant', content: assistantEl.textContent });
     statusEl.textContent = 'Error.';
   } finally {
     sendButton.disabled = false;
