@@ -1,12 +1,12 @@
 ---
-title: Facade of Jade — A Wuxia NPC Drama
+title: Facade of Jade — gr.Server Spike
 emoji: 🗡️
 colorFrom: red
 colorTo: gray
 sdk: gradio
 sdk_version: 6.16.0
 python_version: '3.13'
-app_file: app.py
+app_file: server_app.py
 pinned: false
 license: mit
 tags:
@@ -18,7 +18,7 @@ tags:
   - field-notes
   - best-demo
   - best-agent
-short_description: A Wuxia drama in the spirit of Façade. Qwen3-4B.
+short_description: gr.Server custom UI spike for Facade of Jade.
 ---
 
 # Facade of Jade

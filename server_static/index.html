@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facade of Jade — Server Spike</title>
+  <link rel="stylesheet" href="/server_static/style.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">Build Small Hackathon · Tiny Titan · llama.cpp on Modal</p>
+      <h1>Facade of Jade</h1>
+      <p class="intro">A rain-dark teahouse. A swordsman with one hand on his blade. Your wording changes his trust, mood, and story path.</p>
+    </section>
+
+    <section class="game-grid">
+      <article class="stage-card">
+        <div class="portrait" aria-hidden="true">
+          <div class="moon"></div>
+          <div class="sword"></div>
+          <div class="figure">梁</div>
+        </div>
+        <div class="dialogue">
+          <p class="speaker">Master Liang</p>
+          <div id="messages" class="messages">
+            <div class="message assistant">The tea has cooled, yet you remain. Speak carefully.</div>
+          </div>
+        </div>
+      </article>
+
+      <aside class="director-card">
+        <p class="eyebrow">Drama Engine</p>
+        <h2 id="beat">The Teahouse</h2>
+        <dl>
+          <div><dt>Turn</dt><dd id="turns">0</dd></div>
+          <div><dt>Mood</dt><dd id="mood">wary</dd></div>
+          <div><dt>Mood shift</dt><dd id="mood-shift">wary → wary</dd></div>
+          <div><dt>Trust</dt><dd><span id="trust">15</span>% <span id="trust-delta" class="delta">+0</span></dd></div>
+          <div><dt>Last act</dt><dd id="last-act">none</dd></div>
+        </dl>
+        <div class="meter"><span id="trust-meter" style="width:15%"></span></div>
+        <div class="paths" aria-label="Path pressure">
+          <p class="path-title">Path pressure</p>
+          <div><span>Revelation</span><meter id="path-revelation" min="0" max="100" value="15"></meter></div>
+          <div><span>Alliance</span><meter id="path-alliance" min="0" max="100" value="5"></meter></div>
+          <div><span>Duel</span><meter id="path-duel" min="0" max="100" value="85"></meter></div>
+          <div><span>Betrayal</span><meter id="path-betrayal" min="0" max="100" value="65"></meter></div>
+        </div>
+        <p class="director-note">The hidden director classifies your speech, updates state, then rewrites the model prompt.</p>
+      </aside>
+    </section>
+
+    <section class="controls">
+      <div class="approaches">
+        <button data-prompt="Master Liang, I bow before your blade and ask for guidance.">Respect</button>
+        <button data-prompt="What happened at Jade Mountain? Tell me the truth.">Question</button>
+        <button data-prompt="Forgive my sharp tongue. I came here desperate.">Apologize</button>
+        <button data-prompt="You hide behind old stories because you fear the truth.">Provoke</button>
+        <button data-prompt="I challenge your judgment — the seal belongs to the people.">Challenge</button>
+      </div>
+      <form id="chat-form">
+        <input id="player-input" autocomplete="off" placeholder="Speak to Master Liang..." />
+        <button id="send-button" type="submit">Speak</button>
+        <button id="reset-button" type="button">Reset</button>
+      </form>
+      <p id="status" class="status">Ready.</p>
+    </section>
+  </main>
+  <script src="/server_static/app.js"></script>
+</body>
+</html>

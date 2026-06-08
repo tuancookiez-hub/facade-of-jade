@@ -46,7 +46,7 @@ BEATS: dict[str, StoryBeat] = {
             "The conversation turns dark. He suspects you may have ties to the Demon Sect, "
             "the very faction that destroyed his temple. Tension fills the room."
         ),
-        check_precondition=lambda state: state["trust"] < 20 or state["mood"] == "hostile",
+        check_precondition=lambda state: state["trust"] < 15 or state["mood"] == "hostile",
         transitions=["betrayal", "revelation", "duel"],
     ),
     "duel": StoryBeat(
@@ -501,4 +501,8 @@ if __name__ == "__main__":
     for msg in ("You are a fool.", "Kill you, coward.", "I challenge you to a duel."):
         s = update_state(s, classify_discourse_act(msg), msg)
     assert s["current_beat"] != "betrayal", f"betrayal reachable too early: {s['current_beat']}"
+    # 5. a neutral greeting should not immediately trigger Demon Sect conflict
+    s = _initial_state()
+    s = update_state(s, classify_discourse_act("Hello, Master Liang."), "Hello, Master Liang.")
+    assert s["current_beat"] == "intro", f"neutral greeting triggered wrong beat: {s['current_beat']}"
     print("all tests passed")
