@@ -6,105 +6,115 @@
   <title>Facade of Jade</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Crimson+Text:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Text:wght@400;600;700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/server_static/style.css" />
 </head>
 <body>
-  <main class="novel-shell" aria-label="Facade of Jade interactive novel">
-    <header class="novel-masthead" aria-label="Game identity">
-      <div class="seal-mark" aria-hidden="true">梁</div>
-      <div>
-        <p class="micro-title">A Tiny Titan Drama Engine</p>
-        <h1>Facade of Jade</h1>
-      </div>
-      <button id="reset-button" class="reset-link" type="button" title="Reset story" aria-label="Reset story">Begin again</button>
-    </header>
-
-    <section class="hero-scene" aria-label="Story scene">
-      <div class="scene-art" aria-hidden="true">
-        <div class="paper-grain"></div>
-        <div class="mist mist-a"></div>
-        <div class="mist mist-b"></div>
-        <div class="moon"></div>
-        <div class="distant-ridge ridge-a"></div>
-        <div class="distant-ridge ridge-b"></div>
-        <div class="teahouse">
-          <div class="roof roof-high"></div>
-          <div class="roof roof-low"></div>
-          <div class="house-body"></div>
-          <div class="screen screen-left"></div>
-          <div class="screen screen-right"></div>
-          <div class="lantern">梁</div>
-        </div>
-        <div class="rain rain-a"></div>
-        <div class="rain rain-b"></div>
-        <div class="bamboo bamboo-left"></div>
-        <div class="bamboo bamboo-right"></div>
-        <div class="master-liang">
-          <div class="topknot"></div>
-          <div class="head"></div>
-          <div class="shoulders"></div>
-          <div class="robe"></div>
-          <div class="sleeve"></div>
-          <div class="sword"></div>
+  <main class="game-container" aria-label="Facade of Jade playable conversation">
+    <section class="scene-background" aria-label="Rainy teahouse scene">
+      <div class="night-sky"></div>
+      <div class="rain-layer rain-far"></div>
+      <div class="rain-layer rain-near"></div>
+      <div class="moon-glow"></div>
+      <div class="window-wall">
+        <div class="window-frame">
+          <div class="city-roof roof-one"></div>
+          <div class="city-roof roof-two"></div>
+          <div class="city-roof roof-three"></div>
+          <div class="distant-lantern lantern-dot-a"></div>
+          <div class="distant-lantern lantern-dot-b"></div>
+          <span></span><span></span><span></span><span></span>
         </div>
       </div>
+      <aside class="left-wall" aria-hidden="true">
+        <div class="scroll-banner"><strong>以静制动</strong></div>
+        <div class="lantern-stand"><i></i></div>
+      </aside>
+      <aside class="right-wall" aria-hidden="true">
+        <div class="paper-lantern">茶</div>
+        <div class="weapon-rack"><i class="blade-a"></i><i class="blade-b"></i><i class="bow"></i></div>
+        <div class="incense-side"><i></i><span></span></div>
+      </aside>
+      <div class="floor-shadow"></div>
+      <div class="tea-table">
+        <div class="table-grain"></div>
+        <div class="teapot"><i></i><span></span></div>
+        <div class="tea-cup cup-left"><i></i></div>
+        <div class="tea-cup cup-right"><i></i></div>
+        <div class="incense-burner"><i></i><span></span></div>
+      </div>
+      <div class="player-hands" aria-hidden="true"><span class="hand-left"></span><span class="hand-right"></span></div>
+      <div class="master-liang" aria-hidden="true">
+        <div class="hair hair-back"></div>
+        <div class="topknot"></div>
+        <div class="face"><i class="brow"></i><i class="beard"></i></div>
+        <div class="robe"><i></i></div>
+        <div class="sleeve sleeve-left"></div>
+        <div class="sleeve sleeve-right"></div>
+      </div>
+    </section>
 
-      <aside class="metadata-ribbon" aria-label="Story metadata">
-        <span><b>Mood</b> <i id="mood-dot" class="mood-dot mood-wary"></i><em id="mood">wary</em></span>
-        <span><b>Trust</b> <em><span id="trust">15</span>%</em> <small id="trust-delta" class="delta">+0</small></span>
-        <span><b>Path</b> <em id="beat">Intro</em></span>
-        <span class="soft"><b>Turn</b> <em id="turns">0</em></span>
+    <section class="ui-layer" aria-label="Conversation interface">
+      <header class="top-bar" aria-label="Game title and controls">
+        <div class="logo-lockup">
+          <div class="seal-mark" aria-hidden="true">梁</div>
+          <div>
+            <h1>Facade of Jade</h1>
+            <p>A Tiny Titan Drama Engine</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button id="insights-toggle" class="insights-button" type="button" aria-expanded="false" aria-controls="insights-panel">Insights <span>☰</span></button>
+          <button id="reset-button" class="reset-button" type="button" aria-label="Reset story">Reset</button>
+        </div>
+      </header>
+
+      <aside class="insights-hud" aria-label="Visible story state">
+        <div class="hud-row mood-row"><span>Mood</span><b><i id="mood-dot" class="mood-dot mood-wary"></i><em id="mood">Wary</em></b></div>
+        <div class="hud-row"><span>Trust</span><b><em><span id="trust">15</span>%</em><small id="trust-delta" class="delta">+0</small></b><div class="hud-track"><i id="trust-meter" style="width:15%"></i></div></div>
+        <div class="hud-row"><span>Path Pressure</span><b><em id="path-pressure-label">10%</em></b><div class="hud-track"><i id="path-pressure-meter" style="width:10%"></i></div></div>
       </aside>
 
-      <section class="story-glass" aria-label="Dialogue and choices">
-        <p class="scene-kicker"><span id="last-act">None</span> · <span id="mood-shift">wary → wary</span></p>
-        <article class="quote-card" aria-live="polite">
-          <p id="current-quote" class="current-quote">The tea has cooled, yet you remain. Speak carefully.</p>
-          <p class="speaker"><span></span>Master Liang</p>
+      <section class="dialogue-stage" aria-label="Dialogue">
+        <div class="speaker-tag">Master Liang</div>
+        <article class="dialogue-box" aria-live="polite">
+          <p id="current-quote" class="current-quote">The tea has cooled, yet you remain.</p>
         </article>
-
         <div id="messages" class="messages" aria-label="Conversation log">
           <div class="message assistant">
             <span class="message-meta"><b>Master Liang</b><time>Now</time></span>
-            <span class="message-text">The tea has cooled, yet you remain. Speak carefully.</span>
+            <span class="message-text">The tea has cooled, yet you remain.</span>
           </div>
         </div>
+      </section>
 
-        <form id="chat-form" class="chat-form" aria-label="Speak to Master Liang">
-          <input id="player-input" autocomplete="off" placeholder="What do you say or do?" />
+      <section class="input-stage" aria-label="Player actions">
+        <form id="chat-form" class="chat-form" aria-label="Speak freely">
+          <input id="player-input" autocomplete="off" placeholder="Say something from across the table..." />
           <button id="send-button" class="send-button" type="submit" aria-label="Speak">→</button>
         </form>
         <p id="status" class="status">Ready.</p>
-
-        <section class="action-row" aria-label="Suggested continuations">
-          <button class="action-card" data-prompt="Master Liang, I bow before your blade and ask for guidance.">
-            <b>Offer respect</b><small>Lower tension. Invite trust.</small>
-          </button>
-          <button class="action-card" data-prompt="What happened at Jade Mountain? Tell me the truth.">
-            <b>Ask the wound</b><small>Pull the past into the room.</small>
-          </button>
-          <button class="action-card" data-prompt="You hide behind old stories because you fear the truth.">
-            <b>Touch the nerve</b><small>Risk anger for revelation.</small>
-          </button>
-          <button class="action-card" data-prompt="I challenge your judgment — the seal belongs to the people.">
-            <b>Draw the blade</b><small>Force the story toward conflict.</small>
-          </button>
-        </section>
+        <nav class="action-row" aria-label="Conversational actions">
+          <button class="action-card" data-prompt="Master Liang, I bow before your blade and ask for guidance."><i>碗</i><span><b>Offer Respect</b><small>Show humility. Build trust.</small></span></button>
+          <button class="action-card" data-prompt="Master Liang, what happened to the jade seal?"><i>?</i><span><b>Ask About the Seal</b><small>Seek truth. Invite revelation.</small></span></button>
+          <button class="action-card" data-prompt="I challenge your judgment — the seal belongs to the people."><i>⚔</i><span><b>Challenge Him</b><small>Test his intent. Risk tension.</small></span></button>
+          <button class="action-card" data-prompt="I remain silent and watch what Master Liang does next."><i>葉</i><span><b>Stay Silent</b><small>Observe. Let him speak first.</small></span></button>
+        </nav>
       </section>
-    </section>
 
-    <section class="insights-drawer" aria-label="Drama engine insights">
-      <button id="insights-toggle" class="insights-toggle" type="button" aria-expanded="false" aria-controls="insights-panel">
-        Story engine details <span>⌄</span>
-      </button>
-      <div id="insights-panel" class="insights-panel" hidden>
+      <section id="insights-panel" class="insights-panel" hidden aria-label="Hidden drama engine details">
+        <div class="insight-summary">
+          <span><b>Beat</b><em id="beat">Intro</em></span>
+          <span><b>Turn</b><em id="turns">0</em></span>
+          <span><b>Last act</b><em id="last-act">None</em></span>
+          <span><b>Mood shift</b><em id="mood-shift">wary → wary</em></span>
+        </div>
         <dl class="insight-grid">
           <div><dt>Hot button</dt><dd id="hot-button">none</dd></div>
           <div><dt>Beat goal</dt><dd id="beat-goal">Transition-in: test the visitor and establish suspicion.</dd></div>
           <div><dt>Mix-in</dt><dd id="mix-in">Main beat continues.</dd></div>
         </dl>
-        <div class="meters" aria-label="Path pressure and social games">
+        <div class="meters" aria-label="Full mechanics meters">
           <label><span>Revelation</span><meter id="path-revelation" min="0" max="100" value="15"></meter></label>
           <label><span>Alliance</span><meter id="path-alliance" min="0" max="100" value="5"></meter></label>
           <label><span>Duel</span><meter id="path-duel" min="0" max="100" value="85"></meter></label>
@@ -113,7 +123,7 @@
           <label><span>Therapy</span><meter id="social-realization" min="0" max="100" value="0"></meter></label>
           <label><span>Tension</span><meter id="social-tension" min="0" max="100" value="35"></meter></label>
         </div>
-      </div>
+      </section>
     </section>
   </main>
   <script src="/server_static/app.js"></script>

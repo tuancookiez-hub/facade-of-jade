@@ -85,6 +85,14 @@ function updateState(state) {
   setMeter('#path-alliance', pressure.alliance ?? 0);
   setMeter('#path-duel', pressure.duel ?? 0);
   setMeter('#path-betrayal', pressure.betrayal ?? 0);
+
+  const pathValues = [pressure.revelation, pressure.alliance, pressure.duel, pressure.betrayal]
+    .map(value => Number(value || 0));
+  const pathPressure = Math.max(0, Math.min(100, Math.round(Math.max(...pathValues, 10))));
+  const pathPressureMeter = document.querySelector('#path-pressure-meter');
+  const pathPressureLabel = document.querySelector('#path-pressure-label');
+  if (pathPressureMeter) pathPressureMeter.style.width = `${pathPressure}%`;
+  if (pathPressureLabel) pathPressureLabel.textContent = `${pathPressure}%`;
 }
 
 function setMeter(selector, value) {
@@ -185,8 +193,8 @@ resetButton.addEventListener('click', async () => {
   localStorage.setItem('foj-session-id', sessionId);
   history = [];
   messagesEl.innerHTML = '';
-  addMessage('assistant', 'The tea has cooled, yet you remain. Speak carefully.', false);
-  currentQuoteEl.textContent = 'The tea has cooled, yet you remain. Speak carefully.';
+  addMessage('assistant', 'The tea has cooled, yet you remain.', false);
+  currentQuoteEl.textContent = 'The tea has cooled, yet you remain.';
   statusEl.textContent = 'Reset.';
   try {
     const res = await fetch('/api/reset', {
