@@ -45,7 +45,7 @@ h1 { margin: 0; color: var(--gold); font-size: clamp(2.5rem, 7vw, 5.2rem); lette
 .intro { max-width: 820px; color: var(--muted); line-height: 1.55; font-size: 1.16rem; }
 
 .game-grid { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 18px; }
-.stage-card { min-height: 510px; display: grid; grid-template-columns: 260px minmax(0, 1fr); overflow: hidden; }
+.stage-card { height: calc(100vh - 320px); min-height: 480px; max-height: 720px; display: flex; flex-direction: column; overflow: hidden; }
 .portrait { position: relative; min-height: 510px; background: radial-gradient(circle at 50% 26%, rgba(214,182,109,0.16), transparent 30%), linear-gradient(180deg, #0a120f, #101914); border-right: 1px solid var(--border); }
 .moon { position: absolute; width: 82px; height: 82px; border-radius: 50%; top: 48px; left: 92px; background: rgba(240,231,212,0.82); box-shadow: 0 0 38px rgba(240,231,212,0.35); }
 .sword { position: absolute; width: 8px; height: 300px; top: 118px; left: 132px; background: linear-gradient(180deg, #eee, #777); transform: rotate(18deg); box-shadow: 0 0 16px rgba(214,182,109,0.28); }
@@ -57,7 +57,7 @@ h1 { margin: 0; color: var(--gold); font-size: clamp(2.5rem, 7vw, 5.2rem); lette
 .message.user { margin-left: 38px; color: var(--gold); background: rgba(214,182,109,0.09); }
 .message.assistant { margin-right: 38px; }
 
-.director-card { padding: 20px; background-color: var(--panel-2); }
+.director-card { flex-shrink: 0;  padding: 20px; background-color: var(--panel-2); }
 .director-card h2 { margin: 0 0 14px; color: var(--ivory); }
 dl { margin: 0; display: grid; gap: 10px; }
 dl div { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(214,182,109,0.13); padding-bottom: 8px; }
@@ -65,11 +65,21 @@ dt { color: var(--muted); }
 dd { margin: 0; color: var(--ivory); text-align: right; }
 .delta { color: var(--jade); margin-left: 6px; }
 .delta.negative { color: var(--danger); }
-.meter { margin: 18px 0 14px; height: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.35); overflow: hidden; }
+./* scrollbar */
+.messages::-webkit-scrollbar { width: 8px; }
+.messages::-webkit-scrollbar-track { background: var(--ink); }
+.messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+meter { margin: 18px 0 14px; height: 12px; border: 1px solid var(--border); background: rgba(0,0,0,0.35); overflow: hidden; }
 .meter span { display: block; height: 100%; background: linear-gradient(90deg, #7ba77b, var(--gold)); transition: width 0.35s ease; }
 .paths { margin-top: 16px; display: grid; gap: 8px; }
 .path-title { margin: 0 0 2px; color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.72rem; }
 .paths div { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 10px; color: var(--muted); font-size: 0.92rem; }
+/* scrollbar */
+.messages::-webkit-scrollbar { width: 8px; }
+.messages::-webkit-scrollbar-track { background: var(--ink); }
+.messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
 meter { width: 100%; height: 12px; accent-color: var(--gold); }
 .director-note { color: var(--muted); line-height: 1.45; }
 
