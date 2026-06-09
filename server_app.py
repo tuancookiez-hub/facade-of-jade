@@ -151,7 +151,7 @@ def record_turn(sid: str, message: str, next_state: dict[str, Any], response_tex
 
 @app.get("/", response_class=HTMLResponse)
 async def homepage() -> str:
-    return (APP_DIR / "server_static" / "index.html").read_text(encoding="utf-8")
+    return (APP_DIR / "server_static" / "scene3d.html").read_text(encoding="utf-8")
 
 
 @app.get("/scene3d.html", response_class=HTMLResponse)
