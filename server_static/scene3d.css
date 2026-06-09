@@ -73,6 +73,24 @@ h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp
 #npc-line::-webkit-scrollbar { width: 6px; }
 #npc-line::-webkit-scrollbar-thumb { background: rgba(212,170,85,.32); border-radius: 999px; }
 
+#player-utterance {
+  position: fixed;
+  right: 18px;
+  bottom: 174px;
+  width: min(560px, calc(100vw - 36px));
+  pointer-events: none;
+  border: 1px solid rgba(104, 176, 143, 0.36);
+  border-radius: 16px 16px 4px 16px;
+  background: linear-gradient(180deg, rgba(14, 34, 28, 0.68), rgba(5, 8, 7, 0.74));
+  box-shadow: 0 18px 60px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.06);
+  padding: 11px 14px 12px;
+  backdrop-filter: blur(10px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+#player-utterance.is-empty { opacity: .72; }
+#player-name { color: var(--jade); text-transform: uppercase; letter-spacing: .18em; font-size: .66rem; margin-bottom: 5px; }
+#player-line { color: #e8fff4; font-size: clamp(.92rem, 1.35vw, 1.08rem); line-height: 1.32; max-height: 4.2em; overflow: auto; white-space: pre-wrap; }
+
 #player-bar {
   align-self: end;
   justify-self: center;
@@ -121,6 +139,7 @@ body.is-far #interaction-hint { border-color: rgba(183,70,54,.48); color: #ffd5c
   #classic-link { display: none; }
   #interaction-hint { top: 70px; font-size: .82rem; }
   #npc-bubble { width: calc(100vw - 24px); }
+  #player-utterance { right: 12px; bottom: 220px; width: calc(100vw - 24px); }
   #quick-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   #chat-form { grid-template-columns: 1fr; }
   #send-button { width: 100%; }

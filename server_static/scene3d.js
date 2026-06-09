@@ -3,6 +3,8 @@ import * as THREE from "three";
 const canvas = document.querySelector("#scene-canvas");
 const npcBubble = document.querySelector("#npc-bubble");
 const npcLine = document.querySelector("#npc-line");
+const playerUtterance = document.querySelector("#player-utterance");
+const playerLine = document.querySelector("#player-line");
 const hintEl = document.querySelector("#interaction-hint");
 const form = document.querySelector("#chat-form");
 const input = document.querySelector("#message-input");
@@ -249,6 +251,12 @@ function updateDialogue(text) {
   npcLine.textContent = text || "Master Liang studies you without speaking.";
 }
 
+function updatePlayerDialogue(text) {
+  const spoken = text?.trim() || "Choose a response or type your own words.";
+  playerLine.textContent = spoken;
+  playerUtterance.classList.toggle("is-empty", !text?.trim());
+}
+
 async function sendMessage(message) {
   const trimmed = message.trim();
   if (!trimmed) return;
@@ -259,6 +267,7 @@ async function sendMessage(message) {
   }
 
   setLoading(true);
+  updatePlayerDialogue(trimmed);
   updateDialogue("Master Liang lowers his eyes to the tea. The room waits.");
 
   try {
@@ -365,6 +374,7 @@ createRoom();
 createMasterLiang();
 applySceneState({ mood: "wary", trust: 15, tension: 35, route_milestones: {}, memory_flags: {} });
 updatePlayer(0);
+updatePlayerDialogue("");
 updateInteractionHint();
 updateNpcBubble();
 requestAnimationFrame(animate);

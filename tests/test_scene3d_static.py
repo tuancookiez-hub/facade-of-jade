@@ -55,6 +55,8 @@ def test_scene3d_html_uses_npc_bubble_and_bottom_player_bar() -> None:
 
     assert "npc-bubble" in html
     assert "npc-line" in html
+    assert "player-utterance" in html
+    assert "player-line" in html
     assert "player-bar" in html
     assert "interaction-hint" in html
     assert "WASD" in html
@@ -84,4 +86,6 @@ def test_scene3d_js_projects_npc_speech_bubble_and_gates_talking() -> None:
     assert "canTalk" in js
     assert "Move closer to Master Liang" in js
     assert "npcLine" in js
+    assert "playerLine" in js
+    assert "updatePlayerDialogue" in js
     assert "__scene3dDebug" in js
