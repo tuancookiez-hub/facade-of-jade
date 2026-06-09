@@ -154,6 +154,11 @@ async def homepage() -> str:
     return (APP_DIR / "server_static" / "index.html").read_text(encoding="utf-8")
 
 
+@app.get("/scene3d.html", response_class=HTMLResponse)
+def scene3d_page() -> str:
+    return (APP_DIR / "server_static" / "scene3d.html").read_text(encoding="utf-8")
+
+
 @app.get("/server_static/{filename}")
 async def static_file(filename: str):
     path = APP_DIR / "server_static" / filename

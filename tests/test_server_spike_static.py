@@ -57,3 +57,10 @@ def test_static_frontend_uses_streaming_endpoint_and_path_pressure() -> None:
     assert "buffer.split('\\n')" in js
     assert ".insights-hud" in css
     assert ".master-liang" in css
+
+
+def test_scene3d_route_serves_separate_shell() -> None:
+    html = server_app.scene3d_page()
+    assert "Facade of Jade" in html
+    assert "server_static/scene3d.css" in html
+    assert "server_static/scene3d.js" in html

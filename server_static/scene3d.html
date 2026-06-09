@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Facade of Jade — 3D Prototype</title>
+  <link rel="stylesheet" href="./server_static/scene3d.css" />
+</head>
+<body>
+  <main id="game-shell" aria-label="Facade of Jade lightweight 3D prototype">
+    <canvas id="scene-canvas" aria-label="Low fidelity 3D teahouse scene"></canvas>
+
+    <section id="hud" aria-live="polite">
+      <header id="scene-title">
+        <span class="eyebrow">Facade of Jade</span>
+        <h1>Jade Mountain Teahouse</h1>
+        <a href="./" id="classic-link">classic view</a>
+      </header>
+
+      <div id="dialogue-panel">
+        <div id="speaker">Master Liang</div>
+        <div id="dialogue">The rain holds its breath. Master Liang watches you from across the table.</div>
+      </div>
+
+      <div id="quick-actions" aria-label="Quick actions">
+        <button type="button" data-prompt="Master Liang, I came here to apologize.">Apologize</button>
+        <button type="button" data-prompt="What happened to the jade seal?">Ask seal</button>
+        <button type="button" data-prompt="I challenge you.">Challenge</button>
+        <button type="button" data-prompt="I remain silent.">Stay silent</button>
+      </div>
+
+      <form id="chat-form" autocomplete="off">
+        <input id="message-input" name="message" type="text" maxlength="700" placeholder="Speak to Master Liang..." />
+        <button id="send-button" type="submit">Speak</button>
+      </form>
+
+      <footer id="state-line">
+        <span>Mood: <b id="mood-value">wary</b></span>
+        <span>Trust: <b id="trust-value">15</b></span>
+        <span>Tension: <b id="tension-value">35</b></span>
+        <span>Route: <b id="route-value">intro</b></span>
+      </footer>
+    </section>
+  </main>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+  <script type="module" src="./server_static/scene3d.js"></script>
+</body>
+</html>

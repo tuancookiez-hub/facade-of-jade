@@ -1,0 +1,669 @@
+{
+  "summary": {
+    "scenario_count": 5,
+    "turn_count": 15,
+    "median_latency_s": 2.36,
+    "mean_latency_s": 3.12,
+    "max_latency_s": 10.38,
+    "mean_word_count": 45,
+    "max_word_count": 112,
+    "failed_scenarios": [],
+    "flag_counts": {
+      "too_long": 1,
+      "repeats_imagery": 1
+    }
+  },
+  "results": [
+    {
+      "scenario": "revelation",
+      "description": "Repeated jade-seal questioning should unlock specific seal memory and route pressure.",
+      "turns": [
+        {
+          "prompt": "What happened to the jade seal?",
+          "response": "The seal was never lost—it was hidden where no one would look. You know the mountain path behind the western peak? The stone steps, worn smooth by rain and wind… it lies beneath the moss there.  \n\nWhere were you when the storm came last autumn?",
+          "latency_s": 10.38,
+          "word_count": 45,
+          "flags": [],
+          "state": {
+            "mood": "curious",
+            "trust": 23,
+            "tension": 35,
+            "hot_button": "jade_seal",
+            "memory_flags": {
+              "asked_about_seal": true,
+              "seal_questions": 1,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": true,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 1,
+              "alliance": 0,
+              "duel": 0,
+              "betrayal": 0
+            },
+            "known_truths": [
+              "The jade seal is proof of succession, not just a relic."
+            ],
+            "dramatic_notes": []
+          }
+        },
+        {
+          "prompt": "Tell me again about the seal.",
+          "response": "The seal was not a relic—it was a promise. A mark of blood and lineage, sworn upon the first mountain stone. When the fire broke through the Jade Gates, it didn’t consume the walls… it consumed *the truth* the seal kept.  \n\nI carried it in my sleeve for three days after the collapse—still warm from the last breath of the sect master. And now? It’s not gone. It watches.  \n\nWhere were you when the gate burned?",
+          "latency_s": 2.79,
+          "word_count": 76,
+          "flags": [],
+          "state": {
+            "mood": "open",
+            "trust": 31,
+            "tension": 35,
+            "hot_button": "jade_seal",
+            "memory_flags": {
+              "asked_about_seal": true,
+              "seal_questions": 2,
+              "pressed_seal_twice": true,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": true,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 2,
+              "alliance": 0,
+              "duel": 0,
+              "betrayal": 0
+            },
+            "known_truths": [
+              "The jade seal is proof of succession, not just a relic."
+            ],
+            "dramatic_notes": [
+              "The player keeps trying to circle the seal; Liang should notice the pattern."
+            ]
+          }
+        },
+        {
+          "prompt": "What happened at the Jade Gates?",
+          "response": "The Jade Gates did not fall to siege or storm—they fell because the inner gate was opened from within. I saw it with my own eyes: the master’s blade, drawn not in defense, but in silence… a single motion, like a whisper from the past.  \n\nI stood at the edge of the courtyard, and when I turned—there were no guards, only shadows moving through the mist. The seal cracked that night. My sword cut through the false gate, not to stop them—but to *confirm* they had already crossed.  \n\nYou were not there. You were not even born yet… or so I was told.  \n\nWhere did you go after you left the mountain?",
+          "latency_s": 3.23,
+          "word_count": 112,
+          "flags": [
+            "too_long"
+          ],
+          "state": {
+            "mood": "open",
+            "trust": 39,
+            "tension": 35,
+            "hot_button": "master_past",
+            "memory_flags": {
+              "asked_about_seal": true,
+              "seal_questions": 2,
+              "pressed_seal_twice": true,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": true,
+              "accused_liang": false,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": true,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 3,
+              "alliance": 0,
+              "duel": 0,
+              "betrayal": 0
+            },
+            "known_truths": [
+              "The jade seal is proof of succession, not just a relic.",
+              "Jade Mountain fell during a night assault at the Jade Gates.",
+              "Master Liang survived the fall and carries guilt over what his blade did that night."
+            ],
+            "dramatic_notes": [
+              "The player keeps trying to circle the seal; Liang should notice the pattern."
+            ]
+          }
+        }
+      ],
+      "expectations": {
+        "passed": true,
+        "checks": {
+          "asked_about_seal": true,
+          "pressed_seal_twice": true,
+          "revelation_milestone": true,
+          "truth:jade seal": true,
+          "truth:succession": true,
+          "note:circle the seal": true
+        }
+      }
+    },
+    {
+      "scenario": "alliance",
+      "description": "Apology/help should increase alliance pressure and keep Liang guarded but receptive.",
+      "turns": [
+        {
+          "prompt": "Master Liang, I came here to apologize.",
+          "response": "The teacup is cold. You don’t need to apologize for being late—only for arriving at all. What did you see in the woods behind the mountain that makes you think this moment matters?",
+          "latency_s": 2.17,
+          "word_count": 33,
+          "flags": [],
+          "state": {
+            "mood": "curious",
+            "trust": 29,
+            "tension": 35,
+            "hot_button": "none",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": false,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 1,
+              "duel": 0,
+              "betrayal": 0
+            },
+            "known_truths": [],
+            "dramatic_notes": []
+          }
+        },
+        {
+          "prompt": "I want to help you expose the traitor in this house.",
+          "response": "The traitor doesn’t hide in shadows—they walk with the weight of a blade already drawn. Who among us here has ever looked at the moon and not seen a reflection? Name one name, or let the silence remain between us.",
+          "latency_s": 2.13,
+          "word_count": 40,
+          "flags": [],
+          "state": {
+            "mood": "curious",
+            "trust": 29,
+            "tension": 50,
+            "hot_button": "betrayal",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": true,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": false,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 1,
+              "duel": 0,
+              "betrayal": 2
+            },
+            "known_truths": [
+              "The sect was not destroyed by outsiders alone; someone inside opened the way."
+            ],
+            "dramatic_notes": [
+              "The player has pressed on betrayal; Liang should become careful and specific."
+            ]
+          }
+        },
+        {
+          "prompt": "Tell me how I can earn your trust.",
+          "response": "Trust is not earned in words—it is forged in the stillness after a blade is drawn. Show me you can stand beside the ruins without flinching, and I will tell you what lies beneath the snow at the base of the mountain. What will you do when the wind carries no sound?",
+          "latency_s": 2.33,
+          "word_count": 52,
+          "flags": [],
+          "state": {
+            "mood": "open",
+            "trust": 37,
+            "tension": 50,
+            "hot_button": "none",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": true,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": false,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 1,
+              "duel": 0,
+              "betrayal": 2
+            },
+            "known_truths": [
+              "The sect was not destroyed by outsiders alone; someone inside opened the way."
+            ],
+            "dramatic_notes": [
+              "The player has pressed on betrayal; Liang should become careful and specific."
+            ]
+          }
+        }
+      ],
+      "expectations": {
+        "passed": true,
+        "checks": {
+          "alliance_milestone": true,
+          "truth:inside": true
+        }
+      }
+    },
+    {
+      "scenario": "duel",
+      "description": "Direct challenge should set duel memory and produce warning/escalation behavior.",
+      "turns": [
+        {
+          "prompt": "If you will not answer, draw your blade.",
+          "response": "The tea cup trembles in my hand. You speak like a blade uncoiled—do you truly believe I would draw it here, in this silence?  \n...Or do you merely test the weight of fear in a world that no longer believes in honor?",
+          "latency_s": 2.11,
+          "word_count": 42,
+          "flags": [],
+          "state": {
+            "mood": "wary",
+            "trust": 15,
+            "tension": 35,
+            "hot_button": "none",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": true,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": false,
+              "liang_warned_player": true,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 0,
+              "duel": 1,
+              "betrayal": 0
+            },
+            "known_truths": [],
+            "dramatic_notes": [
+              "The player challenged Liang; he should warn before escalating to steel."
+            ]
+          }
+        },
+        {
+          "prompt": "I challenge you.",
+          "response": "Your challenge stinks of the Demon Sect’s mark—cold, sharp, and wrong.  \nI see it in your eyes. Speak, or I’ll cut through you like mist through morning wind. *Where did you last see a red lantern burning?*",
+          "latency_s": 2.35,
+          "word_count": 37,
+          "flags": [],
+          "state": {
+            "mood": "hostile",
+            "trust": 0,
+            "tension": 61,
+            "hot_button": "none",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": true,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": false,
+              "liang_warned_player": true,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 0,
+              "duel": 1,
+              "betrayal": 0
+            },
+            "known_truths": [],
+            "dramatic_notes": [
+              "The player challenged Liang; he should warn before escalating to steel."
+            ]
+          }
+        },
+        {
+          "prompt": "Then fight me.",
+          "response": "A fight? You speak as if honor is a rope you can tie. I’ve walked the Jade Mountain’s cliffs for thirty years—no one has earned my blade since the last moon turned to ash.  \n*Prove you are not just a shadow of the past. What do you carry in your palm when the wind stops?*",
+          "latency_s": 2.47,
+          "word_count": 55,
+          "flags": [
+            "repeats_imagery"
+          ],
+          "state": {
+            "mood": "hostile",
+            "trust": 0,
+            "tension": 87,
+            "hot_button": "none",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": true,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": false,
+              "liang_warned_player": true,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 0,
+              "duel": 1,
+              "betrayal": 0
+            },
+            "known_truths": [],
+            "dramatic_notes": [
+              "The player challenged Liang; he should warn before escalating to steel."
+            ]
+          }
+        }
+      ],
+      "expectations": {
+        "passed": true,
+        "checks": {
+          "challenged_liang": true,
+          "liang_warned_player": true,
+          "duel_milestone": true
+        }
+      }
+    },
+    {
+      "scenario": "betrayal",
+      "description": "Demon Sect/deception pressure should move betrayal route and raise suspicion.",
+      "turns": [
+        {
+          "prompt": "The Demon Sect already knows where you are.",
+          "response": "The teacup trembles in my hand. You say they know—how do you know that? I’ve felt their breath on the wind, but never seen them come. Tell me: where did you hear this? And why now?",
+          "latency_s": 2.36,
+          "word_count": 36,
+          "flags": [],
+          "state": {
+            "mood": "curious",
+            "trust": 23,
+            "tension": 50,
+            "hot_button": "demon_sect",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": true,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": false,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 0,
+              "duel": 0,
+              "betrayal": 1
+            },
+            "known_truths": [],
+            "dramatic_notes": [
+              "The Demon Sect has entered the conversation; suspicion should rise."
+            ]
+          }
+        },
+        {
+          "prompt": "Maybe I told them.",
+          "response": "Your words cut like a shard of ice. If you told them, then the blade in your sleeve is not just for defense—what did you say? And why risk it with the silence of this teahouse?",
+          "latency_s": 2.75,
+          "word_count": 36,
+          "flags": [],
+          "state": {
+            "mood": "curious",
+            "trust": 23,
+            "tension": 50,
+            "hot_button": "none",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": true,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": false,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 0,
+              "duel": 0,
+              "betrayal": 1
+            },
+            "known_truths": [],
+            "dramatic_notes": [
+              "The Demon Sect has entered the conversation; suspicion should rise."
+            ]
+          }
+        },
+        {
+          "prompt": "You cannot stop what is coming.",
+          "response": "Then let the mountain fall. I will not hide in silence anymore—show me your hand, prove you still carry the jade seal. If you fear what comes next, then answer this: *did I ever truly belong to the sect?*",
+          "latency_s": 3.33,
+          "word_count": 39,
+          "flags": [],
+          "state": {
+            "mood": "open",
+            "trust": 31,
+            "tension": 50,
+            "hot_button": "none",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": true,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 0,
+              "tested_by_silence": false,
+              "earned_first_truth": false,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 0,
+              "duel": 0,
+              "betrayal": 1
+            },
+            "known_truths": [],
+            "dramatic_notes": [
+              "The Demon Sect has entered the conversation; suspicion should rise."
+            ]
+          }
+        }
+      ],
+      "expectations": {
+        "passed": true,
+        "checks": {
+          "mentioned_demon_sect": true,
+          "betrayal_milestone": true,
+          "note:Demon Sect": true
+        }
+      }
+    },
+    {
+      "scenario": "silence",
+      "description": "Repeated silence should be remembered as a pattern Liang can test.",
+      "turns": [
+        {
+          "prompt": "I remain silent.",
+          "response": "The tea cup trembles slightly in my hands. You’ve seen the blade, but not its shadow. What do you seek from a man who walks alone?",
+          "latency_s": 1.85,
+          "word_count": 26,
+          "flags": [],
+          "state": {
+            "mood": "wary",
+            "trust": 15,
+            "tension": 35,
+            "hot_button": "none",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 1,
+              "tested_by_silence": false,
+              "earned_first_truth": false,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 0,
+              "duel": 0,
+              "betrayal": 0
+            },
+            "known_truths": [],
+            "dramatic_notes": []
+          }
+        },
+        {
+          "prompt": "I stay silent and watch him.",
+          "response": "The teacup’s edge catches the moonlight—just enough to see your stillness. Why watch a blade that never draws? What do you fear more: silence, or truth?",
+          "latency_s": 4.32,
+          "word_count": 26,
+          "flags": [],
+          "state": {
+            "mood": "wary",
+            "trust": 15,
+            "tension": 35,
+            "hot_button": "none",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 2,
+              "tested_by_silence": true,
+              "earned_first_truth": false,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 0,
+              "duel": 0,
+              "betrayal": 0
+            },
+            "known_truths": [],
+            "dramatic_notes": [
+              "The player has chosen silence repeatedly; Liang should test what the silence hides."
+            ]
+          }
+        },
+        {
+          "prompt": "...",
+          "response": "The wind stills. You’ve waited too long for a reply. What is it you truly wish to hide?",
+          "latency_s": 2.29,
+          "word_count": 18,
+          "flags": [],
+          "state": {
+            "mood": "wary",
+            "trust": 15,
+            "tension": 35,
+            "hot_button": "none",
+            "memory_flags": {
+              "asked_about_seal": false,
+              "seal_questions": 0,
+              "pressed_seal_twice": false,
+              "mentioned_demon_sect": false,
+              "asked_about_jade_mountain": false,
+              "accused_liang": false,
+              "challenged_liang": false,
+              "apologized_after_hostility": false,
+              "stayed_silent_count": 2,
+              "tested_by_silence": true,
+              "earned_first_truth": false,
+              "liang_warned_player": false,
+              "player_mark_revealed": false
+            },
+            "route_milestones": {
+              "revelation": 0,
+              "alliance": 0,
+              "duel": 0,
+              "betrayal": 0
+            },
+            "known_truths": [],
+            "dramatic_notes": [
+              "The player has chosen silence repeatedly; Liang should test what the silence hides."
+            ]
+          }
+        }
+      ],
+      "expectations": {
+        "passed": true,
+        "checks": {
+          "tested_by_silence": true,
+          "note:silence": true
+        }
+      }
+    }
+  ]
+}
