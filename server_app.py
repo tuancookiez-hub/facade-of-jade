@@ -34,6 +34,7 @@ MODAL_URL = os.environ.get(
     "https://t-abdullah-rashid--facade-of-jade-backend-serve.modal.run",
 )
 NVIDIA_API_KEY = os.environ.get("NVIDIA_API_KEY", "")
+ASR_API_URL = os.environ.get("ASR_API_URL", "https://t-abdullah-rashid--facade-of-jade-asr-serve.modal.run")
 VOXCPM_API_URL = os.environ.get("VOXCPM_API_URL", "https://t-abdullah-rashid--facade-of-jade-tts-serve.modal.run")
 
 APP_DIR = Path(__file__).resolve().parent
@@ -295,7 +296,7 @@ async def api_chat_stream(payload: dict[str, Any]):
 
 @app.post("/api/asr")
 async def api_asr(payload: dict[str, Any]):
-    """Speech-to-text via NVIDIA Nemotron ASR (free hosted API).
+    """Speech-to-text via Nemotron 3 ASR on Modal.
 
     Expects base64-encoded audio WAV in the request body.
     Returns transcribed text.
@@ -304,26 +305,21 @@ async def api_asr(payload: dict[str, Any]):
     if not audio_b64:
         return JSONResponse({"error": "audio (base64) required"}, status_code=400)
 
-    if not NVIDIA_API_KEY:
-        return JSONResponse({"error": "NVIDIA_API_KEY not configured on server"}, status_code=503)
+    if not ASR_API_URL:
+        return JSONResponse({"error": "ASR_API_URL not configured on server"}, status_code=503)
 
     try:
-        import base64
-        audio_bytes = base64.b64decode(audio_b64)
-
-        with httpx.Client(timeout=30.0) as client:
+        with httpx.Client(timeout=60.0, follow_redirects=True) as client:
             response = client.post(
-                "https://integrate.api.nvidia.com/v1/audio/transcriptions",
-                headers={"Authorization": f"Bearer {NVIDIA_API_KEY}"},
-                files={"file": ("audio.wav", io.BytesIO(audio_bytes), "audio/wav")},
-                data={"model": "nvidia/nemotron-asr-streaming-en-0.6b"},
+                f"{ASR_API_URL}/asr",
+                json={"audio": audio_b64},
             )
             response.raise_for_status()
             result = response.json()
             text = result.get("text", "")
             return JSONResponse({"text": text})
     except Exception as exc:
-        return JSONResponse({"error": f"ASR failed: {str(exc)[:200]}"}, status_code=500)
+        return JSONResponse({"error": str(exc)[:200]}, status_code=500)
 
 
 @app.post("/api/tts")
