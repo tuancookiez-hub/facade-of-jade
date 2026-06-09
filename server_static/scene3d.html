@@ -11,48 +11,94 @@
     <canvas id="scene-canvas" aria-label="Low fidelity 3D teahouse scene"></canvas>
 
     <div id="hud">
+      <!-- Top left header -->
       <header id="scene-header">
         <div>
           <p class="eyebrow">Facade of Jade</p>
           <h1>Jade Mountain Teahouse</h1>
+          <p class="control-hints">Use arrow keys to move · <span class="hint-accent">Type to speak</span></p>
         </div>
-        <a href="/" id="classic-link">classic view</a>
+        <a href="/" id="classic-link">classic view <span class="diamond">◆</span></a>
       </header>
 
-      <div id="interaction-hint">WASD to move · Drag to look · Approach Master Liang</div>
+      <!-- Left panel: conversation history -->
+      <aside id="history-panel">
+        <div class="panel-header">
+          <span class="diamond">◆</span>
+          <h2>Conversation History</h2>
+          <div class="header-line"></div>
+        </div>
+        <div id="history-log">
+          <div class="history-empty">Your conversation will appear here...</div>
+        </div>
+      </aside>
 
+      <!-- Right panel: objective + relationship -->
+      <aside id="stats-panel">
+        <div class="panel-section">
+          <div class="panel-header">
+            <span class="diamond">◆</span>
+            <h2>Your Objective</h2>
+            <div class="header-line"></div>
+          </div>
+          <p id="objective-text">Learn the truth about the Jade Seal.</p>
+        </div>
+
+        <div class="panel-section">
+          <div class="panel-header">
+            <span class="diamond">◆</span>
+            <h2>Master Liang</h2>
+            <div class="header-line"></div>
+          </div>
+          <div class="stat-row">
+            <span class="stat-icon trust-icon">❋</span>
+            <span class="stat-label">Trust</span>
+            <div class="stat-bar"><div class="stat-fill trust-fill" id="trust-bar" style="width: 15%"></div></div>
+          </div>
+          <div class="stat-row">
+            <span class="stat-icon respect-icon">❋</span>
+            <span class="stat-label">Respect</span>
+            <div class="stat-bar"><div class="stat-fill respect-fill" id="respect-bar" style="width: 50%"></div></div>
+          </div>
+          <div class="stat-row">
+            <span class="stat-icon suspicion-icon">❋</span>
+            <span class="stat-label">Suspicion</span>
+            <div class="stat-bar"><div class="stat-fill suspicion-fill" id="suspicion-bar" style="width: 35%"></div></div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- NPC bubble (projected above Liang in 3D) -->
       <section id="npc-bubble" aria-live="polite">
         <div id="npc-name">Master Liang</div>
         <div id="npc-line">The rain holds its breath. Master Liang watches you from across the table.</div>
       </section>
 
-      <section id="player-utterance" aria-live="polite">
-        <div id="player-name">You</div>
-        <div id="player-line">Choose a response or type your own words.</div>
-      </section>
-
-      <section id="player-bar" aria-label="Player response controls">
-        <div id="quick-actions" aria-label="Quick actions">
-          <button type="button" data-prompt="Master Liang, I came here to apologize.">Apologize</button>
-          <button type="button" data-prompt="What happened to the jade seal?">Ask seal</button>
-          <button type="button" data-prompt="If you will not answer, draw your blade.">Challenge</button>
-          <button type="button" data-prompt="I remain silent.">Stay silent</button>
+      <!-- Bottom: suggestions + input -->
+      <footer id="interaction-bar">
+        <div id="suggestions">
+          <button type="button" data-prompt="Master Liang, I came here to apologize." class="suggestion">apologize</button>
+          <span class="diamond-sm">◆</span>
+          <button type="button" data-prompt="What happened to the jade seal?" class="suggestion">ask about the seal</button>
+          <span class="diamond-sm">◆</span>
+          <button type="button" data-prompt="If you will not answer, draw your blade." class="suggestion">challenge</button>
+          <span class="diamond-sm">◆</span>
+          <button type="button" data-prompt="I remain silent." class="suggestion">stay silent</button>
         </div>
-
         <form id="chat-form">
-          <input id="message-input" name="message" autocomplete="off" placeholder="Speak to Master Liang..." />
-          <button id="send-button" type="submit">Speak</button>
+          <input id="message-input" name="message" autocomplete="off" placeholder="Type to speak to Master Liang at any time..." />
         </form>
-
-        <footer id="state-strip">
-          <span>Mood: <strong id="mood-value">wary</strong></span>
-          <span>Trust: <strong id="trust-value">15</strong></span>
-          <span>Tension: <strong id="tension-value">35</strong></span>
-          <span>Route: <strong id="route-value">intro</strong></span>
-        </footer>
-      </section>
+      </footer>
     </div>
   </main>
+
+  <!-- Hidden debug state strip -->
+  <footer id="state-strip" aria-hidden="true">
+    <span>Mood: <strong id="mood-value">wary</strong></span>
+    <span>Trust: <strong id="trust-value">15</strong></span>
+    <span>Tension: <strong id="tension-value">35</strong></span>
+    <span>Route: <strong id="route-value">intro</strong></span>
+  </footer>
 
   <script type="importmap">
     {

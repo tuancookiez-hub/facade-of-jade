@@ -3,14 +3,12 @@ import * as THREE from "three";
 const canvas = document.querySelector("#scene-canvas");
 const npcBubble = document.querySelector("#npc-bubble");
 const npcLine = document.querySelector("#npc-line");
-const playerUtterance = document.querySelector("#player-utterance");
-const playerLine = document.querySelector("#player-line");
-const hintEl = document.querySelector("#interaction-hint");
+const historyLog = document.querySelector("#history-log");
+const trustBar = document.querySelector("#trust-bar");
+const respectBar = document.querySelector("#respect-bar");
+const suspicionBar = document.querySelector("#suspicion-bar");
 const form = document.querySelector("#chat-form");
 const input = document.querySelector("#message-input");
-const sendButton = document.querySelector("#send-button");
-const quickActions = document.querySelector("#quick-actions");
-const quickActionButtons = [...document.querySelectorAll("#quick-actions button")];
 const moodValue = document.querySelector("#mood-value");
 const trustValue = document.querySelector("#trust-value");
 const tensionValue = document.querySelector("#tension-value");
@@ -19,15 +17,16 @@ const routeValue = document.querySelector("#route-value");
 const sessionId = `scene3d-${crypto.randomUUID?.() ?? Date.now()}`;
 const history = [];
 const keys = new Set();
-const mouse = { dragging: false, lastX: 0, lastY: 0 };
 const clock = new THREE.Clock();
 
 const player = {
   position: new THREE.Vector3(0, 1.55, 6.55),
   yaw: 0,
   pitch: -0.05,
-  speed: 2.35,
+  speed: 1.85,
 };
+
+const TURN_SPEED = 2.15;
 
 const LIANG_POSITION = new THREE.Vector3(0, 0, -0.85);
 const LIANG_BUBBLE_POSITION = new THREE.Vector3(0, 2.35, -0.85);
@@ -152,23 +151,27 @@ function clampPlayerToRoom() {
 }
 
 function updatePlayer(delta) {
-  const forward = new THREE.Vector3(Math.sin(player.yaw), 0, -Math.cos(player.yaw));
-  const right = new THREE.Vector3(Math.cos(player.yaw), 0, Math.sin(player.yaw));
+  camera.position.copy(player.position);
+  camera.rotation.set(player.pitch, player.yaw, 0, "YXZ");
+
+  const forward = new THREE.Vector3();
+  camera.getWorldDirection(forward);
+  forward.y = 0;
+  forward.normalize();
+
   const movement = new THREE.Vector3();
 
-  if (keys.has("KeyW") || keys.has("ArrowUp")) movement.add(forward);
-  if (keys.has("KeyS") || keys.has("ArrowDown")) movement.addScaledVector(forward, -1);
-  if (keys.has("KeyA") || keys.has("ArrowLeft")) movement.addScaledVector(right, -1);
-  if (keys.has("KeyD") || keys.has("ArrowRight")) movement.add(right);
+  if (keys.has("ArrowUp")) movement.add(forward);
+  if (keys.has("ArrowDown")) movement.addScaledVector(forward, -1);
+  if (keys.has("ArrowLeft")) player.yaw += TURN_SPEED * delta;
+  if (keys.has("ArrowRight")) player.yaw -= TURN_SPEED * delta;
 
   if (movement.lengthSq() > 0) {
     movement.normalize();
     player.position.addScaledVector(movement, player.speed * delta);
     clampPlayerToRoom();
+    camera.position.copy(player.position);
   }
-
-  camera.position.copy(player.position);
-  camera.rotation.set(player.pitch, player.yaw, 0, "YXZ");
 }
 
 function distanceToLiang() {
@@ -186,23 +189,45 @@ function dominantRoute(route_milestones = {}) {
 function updateInteractionHint() {
   const close = canTalk();
   document.body.classList.toggle("is-far", !close);
-  hintEl.textContent = close
-    ? "Drag to look · WASD to move · Speak to Master Liang"
-    : "Move closer to Master Liang";
-  input.disabled = !close || document.body.classList.contains("is-loading");
-  sendButton.disabled = !close || document.body.classList.contains("is-loading");
-  quickActionButtons.forEach((button) => { button.disabled = !close || document.body.classList.contains("is-loading"); });
+  input.disabled = false;
+  document.querySelectorAll(".suggestion").forEach((btn) => { btn.disabled = !close || document.body.classList.contains("is-loading"); });
 }
 
 function updateNpcBubble() {
   const projected = LIANG_BUBBLE_POSITION.clone().project(camera);
   const x = THREE.MathUtils.clamp((projected.x * 0.5 + 0.5) * window.innerWidth, 300, window.innerWidth - 300);
-  const y = THREE.MathUtils.clamp((-projected.y * 0.5 + 0.5) * window.innerHeight, 150, window.innerHeight - 210);
+  const y = THREE.MathUtils.clamp((-projected.y * 0.5 + 0.5) * window.innerHeight, 120, window.innerHeight - 200);
   const behindCamera = projected.z > 1 || projected.z < -1;
 
   npcBubble.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
   npcBubble.classList.toggle("is-hidden", behindCamera || distanceToLiang() > 9.5);
 }
+
+/* ── Conversation history panel ── */
+
+function addHistoryEntry(speaker, text) {
+  const emptyMsg = historyLog.querySelector(".history-empty");
+  if (emptyMsg) emptyMsg.remove();
+
+  const entry = document.createElement("div");
+  entry.className = "history-entry";
+
+  const iconClass = speaker === "player" ? "player" : "npc";
+  const speakerName = speaker === "player" ? "You" : "Master Liang";
+
+  entry.innerHTML = `
+    <div class="history-icon ${iconClass}"></div>
+    <div class="history-content">
+      <div class="history-speaker ${iconClass}">${speakerName}</div>
+      <div class="history-text">${text}</div>
+    </div>
+  `;
+
+  historyLog.appendChild(entry);
+  entry.scrollIntoView({ behavior: "smooth", block: "end" });
+}
+
+/* ── Stat bar updates ── */
 
 function applySceneState(state = {}) {
   const mood = state.mood ?? "wary";
@@ -215,6 +240,13 @@ function applySceneState(state = {}) {
   trustValue.textContent = String(Math.round(trust));
   tensionValue.textContent = String(Math.round(tension));
   routeValue.textContent = route;
+
+  /* Update sidebar stat bars */
+  trustBar.style.width = `${Math.min(trust, 100)}%`;
+  suspicionBar.style.width = `${Math.min(tension, 100)}%`;
+  /* Respect is derived from mood + trust inverse of tension */
+  const respect = Math.max(0, Math.min(100, Math.round((trust * 0.6 + (100 - tension) * 0.4))));
+  respectBar.style.width = `${respect}%`;
 
   lanternLight.intensity = 0.85 + trust / 85;
   redLight.intensity = 0.18 + tension / 70;
@@ -244,31 +276,29 @@ function applySceneState(state = {}) {
 
 function setLoading(isLoading) {
   document.body.classList.toggle("is-loading", isLoading);
-  updateInteractionHint();
 }
 
 function updateDialogue(text) {
   npcLine.textContent = text || "Master Liang studies you without speaking.";
 }
 
-function updatePlayerDialogue(text) {
-  const spoken = text?.trim() || "Choose a response or type your own words.";
-  playerLine.textContent = spoken;
-  playerUtterance.classList.toggle("is-empty", !text?.trim());
+/* ── Typed speech preview (live bottom text while typing) ── */
+
+function updateTypedSpeechPreview() {
+  // Player's typed text only appears in the input field and history panel.
+  // NPC bubble stays unchanged while typing.
 }
+
+/* ── Send message ── */
 
 async function sendMessage(message) {
   const trimmed = message.trim();
   if (!trimmed) return;
 
-  if (!canTalk()) {
-    hintEl.textContent = "Move closer to Master Liang";
-    return;
-  }
+  if (!canTalk()) return;
 
   setLoading(true);
-  updatePlayerDialogue(trimmed);
-  updateDialogue("Master Liang lowers his eyes to the tea. The room waits.");
+  addHistoryEntry("player", trimmed);
 
   try {
     const response = await fetch("/api/chat", {
@@ -285,6 +315,7 @@ async function sendMessage(message) {
     const reply = data.response ?? "Master Liang says nothing.";
     history.push({ role: "user", content: trimmed }, { role: "assistant", content: reply });
     updateDialogue(reply);
+    addHistoryEntry("npc", reply);
     applySceneState(data.state ?? {});
   } catch (error) {
     console.error(error);
@@ -295,37 +326,41 @@ async function sendMessage(message) {
   }
 }
 
+/* ── Input handling ── */
+
+function isTextInputActive() {
+  return ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName ?? "");
+}
+
+function shouldTreatAsMovementKey(event) {
+  const typing = isTextInputActive();
+  if (!typing) return true;
+  return event.code.startsWith("Arrow") || event.code === "Escape";
+}
+
+function isPrintableTypingKey(event) {
+  return event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey;
+}
+
+function appendTypedCharacter(character) {
+  input.focus();
+  input.value = `${input.value}${character}`;
+  updateTypedSpeechPreview();
+}
+
 window.addEventListener("keydown", (event) => {
-  if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName ?? "")) {
-    if (event.code !== "Escape") return;
-    document.activeElement.blur();
+  if (!isTextInputActive() && isPrintableTypingKey(event)) {
+    event.preventDefault();
+    appendTypedCharacter(event.key);
+    return;
   }
+  if (!shouldTreatAsMovementKey(event)) return;
+  if (event.code.startsWith("Arrow")) event.preventDefault();
+  if (event.code === "Escape") document.activeElement?.blur?.();
   keys.add(event.code);
 });
 
 window.addEventListener("keyup", (event) => keys.delete(event.code));
-
-canvas.addEventListener("pointerdown", (event) => {
-  mouse.dragging = true;
-  mouse.lastX = event.clientX;
-  mouse.lastY = event.clientY;
-  canvas.setPointerCapture?.(event.pointerId);
-});
-
-canvas.addEventListener("pointerup", (event) => {
-  mouse.dragging = false;
-  canvas.releasePointerCapture?.(event.pointerId);
-});
-
-canvas.addEventListener("pointermove", (event) => {
-  if (!mouse.dragging) return;
-  const dx = event.clientX - mouse.lastX;
-  const dy = event.clientY - mouse.lastY;
-  mouse.lastX = event.clientX;
-  mouse.lastY = event.clientY;
-  player.yaw -= dx * 0.0032;
-  player.pitch = THREE.MathUtils.clamp(player.pitch - dy * 0.0024, -0.58, 0.36);
-});
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -334,11 +369,21 @@ form.addEventListener("submit", (event) => {
   sendMessage(message);
 });
 
-quickActions.addEventListener("click", (event) => {
-  const button = event.target.closest("button[data-prompt]");
+input.addEventListener("input", updateTypedSpeechPreview);
+
+historyLog.addEventListener("click", (event) => {
+  const button = event.target.closest(".suggestion");
   if (!button) return;
   sendMessage(button.dataset.prompt ?? "");
 });
+
+document.querySelector("#suggestions").addEventListener("click", (event) => {
+  const button = event.target.closest(".suggestion");
+  if (!button) return;
+  sendMessage(button.dataset.prompt ?? "");
+});
+
+/* ── Render loop ── */
 
 function animate(time) {
   const delta = Math.min(clock.getDelta(), 0.05);
@@ -374,7 +419,7 @@ createRoom();
 createMasterLiang();
 applySceneState({ mood: "wary", trust: 15, tension: 35, route_milestones: {}, memory_flags: {} });
 updatePlayer(0);
-updatePlayerDialogue("");
 updateInteractionHint();
 updateNpcBubble();
+input.focus();
 requestAnimationFrame(animate);
