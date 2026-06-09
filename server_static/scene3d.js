@@ -10,7 +10,6 @@ const suspicionBar = document.querySelector("#suspicion-bar");
 const form = document.querySelector("#chat-form");
 const input = document.querySelector("#message-input");
 const moodValue = document.querySelector("#mood-value");
-const micBtn = document.querySelector("#mic-btn");
 const trustValue = document.querySelector("#trust-value");
 const tensionValue = document.querySelector("#tension-value");
 const routeValue = document.querySelector("#route-value");
@@ -385,74 +384,21 @@ document.querySelector("#suggestions").addEventListener("click", (event) => {
   sendMessage(button.dataset.prompt ?? "");
 });
 
-/* ── Voice: mic recording → ASR → send → TTS → play ── */
-
-let mediaRecorder = null;
-let audioChunks = [];
-
-async function startRecording() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
-    audioChunks = [];
-    mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
-    mediaRecorder.onstop = async () => {
-      stream.getTracks().forEach((t) => t.stop());
-      micBtn.classList.remove("is-recording");
-      const blob = new Blob(audioChunks, { type: "audio/webm" });
-      await processVoiceInput(blob);
-    };
-    mediaRecorder.start();
-    micBtn.classList.add("is-recording");
-  } catch (err) {
-    console.error("Microphone access denied:", err);
-  }
-}
-
-function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state === "recording") {
-    mediaRecorder.stop();
-  }
-}
-
-async function processVoiceInput(audioBlob) {
-  try {
-    const arrayBuffer = await audioBlob.arrayBuffer();
-    const bytes = new Uint8Array(arrayBuffer);
-    let binary = "";
-    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
-    const audioB64 = btoa(binary);
-
-    const asrResponse = await fetch("/api/asr", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ audio: audioB64 }),
-    });
-
-    if (!asrResponse.ok) {
-      const err = await asrResponse.json();
-      console.error("ASR error:", err.error);
-      return;
-    }
-
-    const { text } = await asrResponse.json();
-    if (text && text.trim()) {
-      input.value = text.trim();
-      updateTypedSpeechPreview();
-      sendMessage(text.trim());
-    }
-  } catch (err) {
-    console.error("Voice processing failed:", err);
-  }
-}
+/* ── TTS: auto-play Liang's voice after each response ── */
 
 async function speakWithTTS(text) {
+  const indicator = document.createElement("span");
+  indicator.textContent = " 🔊";
+  indicator.style.cssText = "color:#e8a87c;font-size:0.75rem;animation:pulse 1s infinite;";
+  npcLine.parentElement.appendChild(indicator);
+
   try {
     const response = await fetch("/api/tts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
     });
+    indicator.remove();
     if (!response.ok) {
       const err = await response.json();
       console.error("TTS error:", err.error);
@@ -470,15 +416,10 @@ async function speakWithTTS(text) {
       audioEl.play().catch(() => {});
     }
   } catch (err) {
+    indicator.remove();
     console.error("TTS playback failed:", err);
   }
 }
-
-micBtn.addEventListener("mousedown", startRecording);
-micBtn.addEventListener("mouseup", stopRecording);
-micBtn.addEventListener("mouseleave", stopRecording);
-micBtn.addEventListener("touchstart", (e) => { e.preventDefault(); startRecording(); });
-micBtn.addEventListener("touchend", (e) => { e.preventDefault(); stopRecording(); });
 
 /* ── Render loop ── */
 
