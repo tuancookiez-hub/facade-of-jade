@@ -1,11 +1,14 @@
 import * as THREE from "three";
 
 const canvas = document.querySelector("#scene-canvas");
-const dialogueEl = document.querySelector("#dialogue");
+const npcBubble = document.querySelector("#npc-bubble");
+const npcLine = document.querySelector("#npc-line");
+const hintEl = document.querySelector("#interaction-hint");
 const form = document.querySelector("#chat-form");
 const input = document.querySelector("#message-input");
 const sendButton = document.querySelector("#send-button");
 const quickActions = document.querySelector("#quick-actions");
+const quickActionButtons = [...document.querySelectorAll("#quick-actions button")];
 const moodValue = document.querySelector("#mood-value");
 const trustValue = document.querySelector("#trust-value");
 const tensionValue = document.querySelector("#tension-value");
@@ -13,14 +16,26 @@ const routeValue = document.querySelector("#route-value");
 
 const sessionId = `scene3d-${crypto.randomUUID?.() ?? Date.now()}`;
 const history = [];
+const keys = new Set();
+const mouse = { dragging: false, lastX: 0, lastY: 0 };
+const clock = new THREE.Clock();
+
+const player = {
+  position: new THREE.Vector3(0, 1.55, 6.55),
+  yaw: 0,
+  pitch: -0.05,
+  speed: 2.35,
+};
+
+const LIANG_POSITION = new THREE.Vector3(0, 0, -0.85);
+const LIANG_BUBBLE_POSITION = new THREE.Vector3(0, 2.35, -0.85);
+const TALK_DISTANCE = 7.8;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x130906);
 scene.fog = new THREE.FogExp2(0x1b0f0a, 0.045);
 
 const camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 1.55, 6.8);
-camera.lookAt(0, 1.15, 0);
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -76,10 +91,11 @@ function mesh(geometry, material, position, scale = [1, 1, 1]) {
 }
 
 function createRoom() {
-  mesh(new THREE.BoxGeometry(10, 0.16, 10), materials.floor, [0, -0.08, 0]);
+  mesh(new THREE.BoxGeometry(10, 0.16, 11), materials.floor, [0, -0.08, 1]);
   mesh(new THREE.BoxGeometry(10, 4, 0.18), materials.wall, [0, 1.9, -3.2]);
-  mesh(new THREE.BoxGeometry(0.18, 4, 8), materials.wall, [-4.7, 1.9, 0.7]);
-  mesh(new THREE.BoxGeometry(0.18, 4, 8), materials.wall, [4.7, 1.9, 0.7]);
+  mesh(new THREE.BoxGeometry(10, 4, 0.18), materials.wall, [0, 1.9, 7.3]);
+  mesh(new THREE.BoxGeometry(0.18, 4, 10.5), materials.wall, [-4.7, 1.9, 2.05]);
+  mesh(new THREE.BoxGeometry(0.18, 4, 10.5), materials.wall, [4.7, 1.9, 2.05]);
 
   for (let x = -3; x <= 3; x += 1.5) {
     mesh(new THREE.BoxGeometry(0.8, 1.35, 0.06), materials.paper, [x, 2.05, -3.08]);
@@ -87,6 +103,7 @@ function createRoom() {
     mesh(new THREE.BoxGeometry(0.055, 1.55, 0.09), materials.wood, [x + 0.45, 2.05, -3.02]);
   }
 
+  mesh(new THREE.BoxGeometry(1.2, 2.35, 0.08), materials.wood, [0, 1.15, 7.18]);
   mesh(new THREE.CylinderGeometry(0.95, 1.05, 0.18, 8), materials.wood, [0, 0.55, 1.2]);
   mesh(new THREE.CylinderGeometry(0.14, 0.18, 0.55, 8), materials.wood, [-0.55, 0.22, 0.75]);
   mesh(new THREE.CylinderGeometry(0.14, 0.18, 0.55, 8), materials.wood, [0.55, 0.22, 0.75]);
@@ -116,22 +133,73 @@ function addNpcPart(geometry, material, position, scale = [1, 1, 1]) {
 }
 
 function createMasterLiang() {
-  npc.position.set(0, 0, -0.85);
+  npc.position.copy(LIANG_POSITION);
   addNpcPart(new THREE.CylinderGeometry(0.48, 0.68, 1.2, 9), materials.robe, [0, 0.9, 0]);
   addNpcPart(new THREE.SphereGeometry(0.31, 10, 8), materials.skin, [0, 1.66, 0.02]);
   addNpcPart(new THREE.SphereGeometry(0.33, 10, 8, 0, Math.PI * 2, 0, Math.PI * 0.55), materials.hair, [0, 1.76, 0.0]);
-  addNpcPart(new THREE.CylinderGeometry(0.07, 0.08, 0.95, 7), materials.robe, [-0.52, 1.08, 0.1], [1, 1, 1]).rotation.z = 0.7;
-  addNpcPart(new THREE.CylinderGeometry(0.07, 0.08, 0.95, 7), materials.robe, [0.52, 1.08, 0.1], [1, 1, 1]).rotation.z = -0.7;
+  addNpcPart(new THREE.CylinderGeometry(0.07, 0.08, 0.95, 7), materials.robe, [-0.52, 1.08, 0.1]).rotation.z = 0.7;
+  addNpcPart(new THREE.CylinderGeometry(0.07, 0.08, 0.95, 7), materials.robe, [0.52, 1.08, 0.1]).rotation.z = -0.7;
   addNpcPart(new THREE.BoxGeometry(0.9, 0.05, 0.08), materials.gold, [0.0, 1.02, 0.39]);
   addNpcPart(new THREE.CylinderGeometry(0.24, 0.26, 0.13, 12), materials.wood, [-0.9, 0.45, -0.02]);
   addNpcPart(new THREE.CylinderGeometry(0.24, 0.26, 0.13, 12), materials.wood, [0.9, 0.45, -0.02]);
 }
 
-createRoom();
-createMasterLiang();
+function clampPlayerToRoom() {
+  player.position.x = THREE.MathUtils.clamp(player.position.x, -4.05, 4.05);
+  player.position.z = THREE.MathUtils.clamp(player.position.z, -1.75, 6.85);
+}
+
+function updatePlayer(delta) {
+  const forward = new THREE.Vector3(Math.sin(player.yaw), 0, -Math.cos(player.yaw));
+  const right = new THREE.Vector3(Math.cos(player.yaw), 0, Math.sin(player.yaw));
+  const movement = new THREE.Vector3();
+
+  if (keys.has("KeyW") || keys.has("ArrowUp")) movement.add(forward);
+  if (keys.has("KeyS") || keys.has("ArrowDown")) movement.addScaledVector(forward, -1);
+  if (keys.has("KeyA") || keys.has("ArrowLeft")) movement.addScaledVector(right, -1);
+  if (keys.has("KeyD") || keys.has("ArrowRight")) movement.add(right);
+
+  if (movement.lengthSq() > 0) {
+    movement.normalize();
+    player.position.addScaledVector(movement, player.speed * delta);
+    clampPlayerToRoom();
+  }
+
+  camera.position.copy(player.position);
+  camera.rotation.set(player.pitch, player.yaw, 0, "YXZ");
+}
+
+function distanceToLiang() {
+  return player.position.distanceTo(LIANG_POSITION);
+}
+
+function canTalk() {
+  return distanceToLiang() <= TALK_DISTANCE;
+}
 
 function dominantRoute(route_milestones = {}) {
   return Object.entries(route_milestones).sort((a, b) => Number(b[1]) - Number(a[1]))[0]?.[0] ?? "intro";
+}
+
+function updateInteractionHint() {
+  const close = canTalk();
+  document.body.classList.toggle("is-far", !close);
+  hintEl.textContent = close
+    ? "Drag to look · WASD to move · Speak to Master Liang"
+    : "Move closer to Master Liang";
+  input.disabled = !close || document.body.classList.contains("is-loading");
+  sendButton.disabled = !close || document.body.classList.contains("is-loading");
+  quickActionButtons.forEach((button) => { button.disabled = !close || document.body.classList.contains("is-loading"); });
+}
+
+function updateNpcBubble() {
+  const projected = LIANG_BUBBLE_POSITION.clone().project(camera);
+  const x = THREE.MathUtils.clamp((projected.x * 0.5 + 0.5) * window.innerWidth, 300, window.innerWidth - 300);
+  const y = THREE.MathUtils.clamp((-projected.y * 0.5 + 0.5) * window.innerHeight, 150, window.innerHeight - 210);
+  const behindCamera = projected.z > 1 || projected.z < -1;
+
+  npcBubble.style.transform = `translate(-50%, -100%) translate(${x}px, ${y}px)`;
+  npcBubble.classList.toggle("is-hidden", behindCamera || distanceToLiang() > 9.5);
 }
 
 function applySceneState(state = {}) {
@@ -165,27 +233,30 @@ function applySceneState(state = {}) {
     scene.fog.color.set(0x120707);
   } else {
     redLight.color.set(0xb7382d);
-    scene.fog.color.set(0x100907);
+    scene.fog.color.set(0x1b0f0a);
   }
 
-  camera.fov = route === "duel" || tension > 70 ? 44 : 52 - Math.min(trust, 70) / 18;
-  camera.position.z = 6.9 - Math.min(trust, 65) / 55;
+  camera.fov = route === "duel" || tension > 70 ? 44 : 52 - Math.min(trust, 70) / 22;
   camera.updateProjectionMatrix();
 }
 
 function setLoading(isLoading) {
   document.body.classList.toggle("is-loading", isLoading);
-  sendButton.disabled = isLoading;
-  input.disabled = isLoading;
+  updateInteractionHint();
 }
 
 function updateDialogue(text) {
-  dialogueEl.textContent = text || "Master Liang studies you without speaking.";
+  npcLine.textContent = text || "Master Liang studies you without speaking.";
 }
 
 async function sendMessage(message) {
   const trimmed = message.trim();
   if (!trimmed) return;
+
+  if (!canTalk()) {
+    hintEl.textContent = "Move closer to Master Liang";
+    return;
+  }
 
   setLoading(true);
   updateDialogue("Master Liang lowers his eyes to the tea. The room waits.");
@@ -215,6 +286,38 @@ async function sendMessage(message) {
   }
 }
 
+window.addEventListener("keydown", (event) => {
+  if (["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName ?? "")) {
+    if (event.code !== "Escape") return;
+    document.activeElement.blur();
+  }
+  keys.add(event.code);
+});
+
+window.addEventListener("keyup", (event) => keys.delete(event.code));
+
+canvas.addEventListener("pointerdown", (event) => {
+  mouse.dragging = true;
+  mouse.lastX = event.clientX;
+  mouse.lastY = event.clientY;
+  canvas.setPointerCapture?.(event.pointerId);
+});
+
+canvas.addEventListener("pointerup", (event) => {
+  mouse.dragging = false;
+  canvas.releasePointerCapture?.(event.pointerId);
+});
+
+canvas.addEventListener("pointermove", (event) => {
+  if (!mouse.dragging) return;
+  const dx = event.clientX - mouse.lastX;
+  const dy = event.clientY - mouse.lastY;
+  mouse.lastX = event.clientX;
+  mouse.lastY = event.clientY;
+  player.yaw -= dx * 0.0032;
+  player.pitch = THREE.MathUtils.clamp(player.pitch - dy * 0.0024, -0.58, 0.36);
+});
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   const message = input.value;
@@ -229,7 +332,11 @@ quickActions.addEventListener("click", (event) => {
 });
 
 function animate(time) {
+  const delta = Math.min(clock.getDelta(), 0.05);
   const t = time / 1000;
+  updatePlayer(delta);
+  updateInteractionHint();
+  updateNpcBubble();
   npc.position.y = Math.sin(t * 1.15) * 0.018;
   lanternLight.intensity += Math.sin(t * 4.2) * 0.006;
   renderer.render(scene, camera);
@@ -242,5 +349,22 @@ window.addEventListener("resize", () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
+window.__scene3dDebug = {
+  getPlayer: () => ({
+    x: player.position.x,
+    y: player.position.y,
+    z: player.position.z,
+    yaw: player.yaw,
+    pitch: player.pitch,
+    canTalk: canTalk(),
+    distanceToLiang: distanceToLiang(),
+  }),
+};
+
+createRoom();
+createMasterLiang();
 applySceneState({ mood: "wary", trust: 15, tension: 35, route_milestones: {}, memory_flags: {} });
+updatePlayer(0);
+updateInteractionHint();
+updateNpcBubble();
 requestAnimationFrame(animate);

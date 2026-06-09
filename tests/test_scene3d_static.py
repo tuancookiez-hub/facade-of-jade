@@ -44,6 +44,44 @@ def test_scene3d_css_supports_fullscreen_canvas_and_dialogue_overlay() -> None:
 
     assert "#scene-canvas" in css
     assert "#hud" in css
-    assert "#dialogue" in css
+    assert "#npc-bubble" in css
+    assert "#player-bar" in css
     assert "position: fixed" in css
     assert "pointer-events" in css
+
+
+def test_scene3d_html_uses_npc_bubble_and_bottom_player_bar() -> None:
+    html = read_static("scene3d.html")
+
+    assert "npc-bubble" in html
+    assert "npc-line" in html
+    assert "player-bar" in html
+    assert "interaction-hint" in html
+    assert "WASD" in html
+    assert "Drag" in html
+
+
+def test_scene3d_js_has_first_person_controls_and_bounds() -> None:
+    js = read_static("scene3d.js")
+
+    assert "updatePlayer" in js
+    assert "clampPlayerToRoom" in js
+    assert "KeyW" in js
+    assert "KeyA" in js
+    assert "KeyS" in js
+    assert "KeyD" in js
+    assert "pointermove" in js
+    assert "player.yaw" in js
+    assert "player.pitch" in js
+
+
+def test_scene3d_js_projects_npc_speech_bubble_and_gates_talking() -> None:
+    js = read_static("scene3d.js")
+
+    assert "updateNpcBubble" in js
+    assert ".project(camera)" in js
+    assert "distanceToLiang" in js
+    assert "canTalk" in js
+    assert "Move closer to Master Liang" in js
+    assert "npcLine" in js
+    assert "__scene3dDebug" in js

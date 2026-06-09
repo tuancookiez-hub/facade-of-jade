@@ -10,43 +10,49 @@
   <main id="game-shell" aria-label="Facade of Jade lightweight 3D prototype">
     <canvas id="scene-canvas" aria-label="Low fidelity 3D teahouse scene"></canvas>
 
-    <section id="hud" aria-live="polite">
-      <header id="scene-title">
-        <span class="eyebrow">Facade of Jade</span>
-        <h1>Jade Mountain Teahouse</h1>
-        <a href="./" id="classic-link">classic view</a>
+    <div id="hud">
+      <header id="scene-header">
+        <div>
+          <p class="eyebrow">Facade of Jade</p>
+          <h1>Jade Mountain Teahouse</h1>
+        </div>
+        <a href="/" id="classic-link">classic view</a>
       </header>
 
-      <div id="dialogue-panel">
-        <div id="speaker">Master Liang</div>
-        <div id="dialogue">The rain holds its breath. Master Liang watches you from across the table.</div>
-      </div>
+      <div id="interaction-hint">WASD to move · Drag to look · Approach Master Liang</div>
 
-      <div id="quick-actions" aria-label="Quick actions">
-        <button type="button" data-prompt="Master Liang, I came here to apologize.">Apologize</button>
-        <button type="button" data-prompt="What happened to the jade seal?">Ask seal</button>
-        <button type="button" data-prompt="I challenge you.">Challenge</button>
-        <button type="button" data-prompt="I remain silent.">Stay silent</button>
-      </div>
+      <section id="npc-bubble" aria-live="polite">
+        <div id="npc-name">Master Liang</div>
+        <div id="npc-line">The rain holds its breath. Master Liang watches you from across the table.</div>
+      </section>
 
-      <form id="chat-form" autocomplete="off">
-        <input id="message-input" name="message" type="text" maxlength="700" placeholder="Speak to Master Liang..." />
-        <button id="send-button" type="submit">Speak</button>
-      </form>
+      <section id="player-bar" aria-label="Player response controls">
+        <div id="quick-actions" aria-label="Quick actions">
+          <button type="button" data-prompt="Master Liang, I came here to apologize.">Apologize</button>
+          <button type="button" data-prompt="What happened to the jade seal?">Ask seal</button>
+          <button type="button" data-prompt="If you will not answer, draw your blade.">Challenge</button>
+          <button type="button" data-prompt="I remain silent.">Stay silent</button>
+        </div>
 
-      <footer id="state-line">
-        <span>Mood: <b id="mood-value">wary</b></span>
-        <span>Trust: <b id="trust-value">15</b></span>
-        <span>Tension: <b id="tension-value">35</b></span>
-        <span>Route: <b id="route-value">intro</b></span>
-      </footer>
-    </section>
+        <form id="chat-form">
+          <input id="message-input" name="message" autocomplete="off" placeholder="Speak to Master Liang..." />
+          <button id="send-button" type="submit">Speak</button>
+        </form>
+
+        <footer id="state-strip">
+          <span>Mood: <strong id="mood-value">wary</strong></span>
+          <span>Trust: <strong id="trust-value">15</strong></span>
+          <span>Tension: <strong id="tension-value">35</strong></span>
+          <span>Route: <strong id="route-value">intro</strong></span>
+        </footer>
+      </section>
+    </div>
   </main>
 
   <script type="importmap">
     {
       "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+        "three": "https://unpkg.com/three@0.164.1/build/three.module.js"
       }
     }
   </script>
