@@ -386,6 +386,22 @@ document.querySelector("#suggestions").addEventListener("click", (event) => {
 
 /* ── TTS: auto-play Liang's voice after each response ── */
 
+let ttsAudioQueue = [];
+let isPlayingTTS = false;
+
+async function warmTTS() {
+  // Pre-warm the TTS endpoint to avoid cold starts
+  fetch("/api/tts", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: ".", warmup: true }),
+  }).catch(() => {});
+}
+
+// Warm TTS on page load and every 5 minutes
+warmTTS();
+setInterval(warmTTS, 5 * 60 * 1000);
+
 async function speakWithTTS(text) {
   const indicator = document.createElement("span");
   indicator.textContent = " 🔊";

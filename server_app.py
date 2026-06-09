@@ -333,6 +333,10 @@ async def api_tts(payload: dict[str, Any]):
     if not text:
         return JSONResponse({"error": "text required"}, status_code=400)
 
+    # Warmup request — just return empty, don't call Modal
+    if payload.get("warmup"):
+        return JSONResponse({"audio": "", "warmup": True})
+
     if not VOXCPM_API_URL:
         return JSONResponse({"error": "VOXCPM_API_URL not configured on server"}, status_code=503)
 
