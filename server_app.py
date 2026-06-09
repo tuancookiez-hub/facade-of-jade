@@ -6,6 +6,7 @@ safe on HF Spaces. It reuses the existing drama manager and Modal backend.
 
 from __future__ import annotations
 
+import io
 import json
 import os
 import uuid
@@ -32,6 +33,8 @@ MODAL_URL = os.environ.get(
     "MODAL_URL",
     "https://t-abdullah-rashid--facade-of-jade-backend-serve.modal.run",
 )
+NVIDIA_API_KEY = os.environ.get("NVIDIA_API_KEY", "")
+VOXCPM_API_URL = os.environ.get("VOXCPM_API_URL", "https://t-abdullah-rashid--facade-of-jade-tts-serve.modal.run")
 
 APP_DIR = Path(__file__).resolve().parent
 SESSIONS: dict[str, dict[str, Any]] = {}
@@ -61,11 +64,7 @@ def initial_state() -> dict[str, Any]:
 
 
 def path_pressure(state: dict[str, Any]) -> dict[str, int]:
-    """Return simple visible route pressure for the custom UI.
-
-    This is intentionally explainable rather than ML-derived: it gives judges a
-    quick view of how the drama-manager state points toward possible endings.
-    """
+    """Return simple visible route pressure for the custom UI."""
     trust = int(state.get("trust", 0))
     mood = state.get("mood", "wary")
     challenged = bool(state.get("player_challenged", False))
@@ -149,6 +148,8 @@ def record_turn(sid: str, message: str, next_state: dict[str, Any], response_tex
     return trace
 
 
+# ── Pages ──
+
 @app.get("/", response_class=HTMLResponse)
 async def homepage() -> str:
     return (APP_DIR / "server_static" / "scene3d.html").read_text(encoding="utf-8")
@@ -167,6 +168,8 @@ async def static_file(filename: str):
     media_type = "text/css" if filename.endswith(".css") else "application/javascript"
     return HTMLResponse(path.read_text(encoding="utf-8"), media_type=media_type)
 
+
+# ── API ──
 
 @app.get("/api/state")
 async def api_state(session_id: str | None = None):
@@ -286,6 +289,81 @@ async def api_chat_stream(payload: dict[str, Any]):
         yield json.dumps({"type": "done", "session_id": sid, "response": accumulated, "state": describe_state(next_state), "trace": trace}) + "\n"
 
     return StreamingResponse(events(), media_type="application/x-ndjson")
+
+
+# ── Voice endpoints ──
+
+@app.post("/api/asr")
+async def api_asr(payload: dict[str, Any]):
+    """Speech-to-text via NVIDIA Nemotron ASR (free hosted API).
+
+    Expects base64-encoded audio WAV in the request body.
+    Returns transcribed text.
+    """
+    audio_b64 = payload.get("audio")
+    if not audio_b64:
+        return JSONResponse({"error": "audio (base64) required"}, status_code=400)
+
+    if not NVIDIA_API_KEY:
+        return JSONResponse({"error": "NVIDIA_API_KEY not configured on server"}, status_code=503)
+
+    try:
+        import base64
+        audio_bytes = base64.b64decode(audio_b64)
+
+        with httpx.Client(timeout=30.0) as client:
+            response = client.post(
+                "https://integrate.api.nvidia.com/v1/audio/transcriptions",
+                headers={"Authorization": f"Bearer {NVIDIA_API_KEY}"},
+                files={"file": ("audio.wav", io.BytesIO(audio_bytes), "audio/wav")},
+                data={"model": "nvidia/nemotron-asr-streaming-en-0.6b"},
+            )
+            response.raise_for_status()
+            result = response.json()
+            text = result.get("text", "")
+            return JSONResponse({"text": text})
+    except Exception as exc:
+        return JSONResponse({"error": f"ASR failed: {str(exc)[:200]}"}, status_code=500)
+
+
+@app.post("/api/tts")
+async def api_tts(payload: dict[str, Any]):
+    """Text-to-speech via VoxCPM2.
+
+    Expects {"text": "..."} and optional {"voice": "description"}.
+    Returns base64-encoded audio WAV.
+    """
+    text = payload.get("text", "").strip()
+    if not text:
+        return JSONResponse({"error": "text required"}, status_code=400)
+
+    if not VOXCPM_API_URL:
+        return JSONResponse({"error": "VOXCPM_API_URL not configured on server"}, status_code=503)
+
+    try:
+        import base64
+
+        voice_desc = payload.get("voice", "(An older Chinese man, calm and measured voice, slight rasp)")
+
+        with httpx.Client(timeout=60.0, follow_redirects=True) as client:
+            response = client.post(
+                f"{VOXCPM_API_URL}/tts",
+                json={"text": f"{voice_desc}{text}"},
+            )
+            response.raise_for_status()
+
+            content_type = response.headers.get("content-type", "")
+            if "audio" in content_type or "wav" in content_type or "octet-stream" in content_type:
+                audio_b64 = base64.b64encode(response.content).decode("utf-8")
+                return JSONResponse({"audio": audio_b64})
+            else:
+                result = response.json()
+                audio_b64 = result.get("audio", "")
+                if not audio_b64:
+                    return JSONResponse({"error": "No audio in response"}, status_code=500)
+                return JSONResponse({"audio": audio_b64})
+    except Exception as exc:
+        return JSONResponse({"error": f"TTS failed: {str(exc)[:200]}"}, status_code=500)
 
 
 @app.api(name="health")

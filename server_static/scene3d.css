@@ -323,8 +323,26 @@ h1 {
 }
 #message-input:focus { border-bottom-color: rgba(104,176,143,.45); }
 #message-input:disabled { opacity: 0.4; }
-
-/* ── Hidden debug strip ── */
+#mic-btn {
+  border: 0;
+  background: none;
+  color: rgba(244, 231, 200, 0.45);
+  font-size: 1.1rem;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+#mic-btn:hover { color: var(--ink); }
+#mic-btn.is-recording {
+  color: var(--danger);
+  animation: mic-pulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes mic-pulse {
+  from { opacity: 0.6; }
+  to { opacity: 1; }
+}
+#send-button { display: none; }
 #state-strip { display: none; }
 
 /* ── Loading / distance states ── */
