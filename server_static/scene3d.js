@@ -390,11 +390,13 @@ let ttsAudioQueue = [];
 let isPlayingTTS = false;
 
 async function warmTTS() {
-  // Pre-warm the TTS endpoint to avoid cold starts
+  // Pre-warm the TTS endpoint to avoid cold starts.
+  // Server forwards to Modal with a short "Hm." prompt so VoxCPM2 stays loaded.
+  // Fire-and-forget: the response body is empty and any failure is swallowed.
   fetch("/api/tts", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text: ".", warmup: true }),
+    body: JSON.stringify({ warmup: true }),
   }).catch(() => {});
 }
 
