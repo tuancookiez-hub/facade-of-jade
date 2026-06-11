@@ -329,13 +329,26 @@ async def api_tts(payload: dict[str, Any]):
     Expects {"text": "..."} and optional {"voice": "description"}.
     Returns base64-encoded audio WAV.
     """
+    # Warmup request — actually call Modal with a short prompt so the VoxCPM2
+    # container stays warm (prevents 2-3 min cold starts on the first real TTS
+    # call). Best-effort: any failure is silently dropped because warmup pings
+    # fire-and-forget from the frontend. Checked first so warmup doesn't need
+    # to send "text" alongside the flag.
+    if payload.get("warmup"):
+        if VOXCPM_API_URL:
+            try:
+                with httpx.Client(timeout=30.0, follow_redirects=True) as client:
+                    client.post(
+                        f"{VOXCPM_API_URL}/tts",
+                        json={"text": "Hm."},
+                    )
+            except Exception:
+                pass
+        return JSONResponse({"audio": "", "warmup": True})
+
     text = payload.get("text", "").strip()
     if not text:
         return JSONResponse({"error": "text required"}, status_code=400)
-
-    # Warmup request — just return empty, don't call Modal
-    if payload.get("warmup"):
-        return JSONResponse({"audio": "", "warmup": True})
 
     if not VOXCPM_API_URL:
         return JSONResponse({"error": "VOXCPM_API_URL not configured on server"}, status_code=503)

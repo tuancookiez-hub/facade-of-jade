@@ -141,6 +141,7 @@ def _build_app():
     timeout=10 * 60,
     scaledown_window=10 * 60,
     max_containers=2,
+    min_containers=1,
 )
 @modal.concurrent(max_inputs=4)
 @modal.asgi_app()
