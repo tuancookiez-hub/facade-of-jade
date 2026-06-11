@@ -6,59 +6,69 @@ Add voice to Master Liang so he speaks his dialogue aloud after each response. F
 ## Current State
 - **TTS endpoint**: VoxCPM2 deployed on Modal (A10G GPU), live and healthy
   - URL: `https://t-abdullah-rashid--facade-of-jade-tts-serve.modal.run`
-  - Cold start: ~2-3 min, warm: ~3-4s per request
+  - Cold start: **eliminated** for active use via `min_containers=1` + 5-min warmup pings
+  - Warm latency (verified 2026-06-12): **4-5s** per request on A10G (the prior handoff's 3-4s was optimistic)
+  - Warmup pings themselves take 2-3s (short "Hm." prompt)
   - Returns 48kHz WAV audio
 - **ASR endpoint**: Nemotron 3 ASR also deployed on Modal (separate endpoint)
   - URL: `https://t-abdullah-rashid--facade-of-jade-asr-serve.modal.run`
   - Working but NOT wired to frontend (ASR deprioritized)
 - **Frontend**: TTS auto-plays after each Liang response with 🔊 loading indicator
-  - Warmup ping on page load + every 5 min to prevent Modal cold starts
-  - Mic button and all ASR code removed from UI
+  - Warmup ping on page load + every 5 min — now actually reaches Modal (was a no-op, see pitfalls)
 - **Backend**: `/api/tts` proxies to Modal VoxCPM2, `/api/asr` proxies to Modal Nemotron
-- **Tests**: All 28 tests passing
+- **Tests**: 30/30 passing (added 2 warmup regression tests)
 - **Deployed**: Live on HF Spaces `https://build-small-hackathon-facade-of-jade.hf.space`
 
 ## Files in Flight
-- `modal_tts.py` — Modal deployment for VoxCPM2 TTS
+- `modal_tts.py` — Modal deployment for VoxCPM2 TTS (now with `min_containers=1`)
 - `modal_asr.py` — Modal deployment for Nemotron ASR
-- `server_app.py` — HF Space backend, `/api/tts` and `/api/asr` endpoints
+- `server_app.py` — HF Space backend, `/api/tts` (warmup now actually calls Modal), `/api/asr` endpoints
 - `server_static/scene3d.js` — Frontend TTS playback + warmup pings
 - `server_static/scene3d.html` — UI (mic button removed)
 
-## Changed This Session
-- Created `modal_tts.py` with VoxCPM2 on Modal A10G
-- Created `modal_asr.py` with Nemotron 3 ASR on Modal A10G
-- Wired `/api/tts` and `/api/asr` in `server_app.py`
-- Added `speakWithTTS()` to frontend with 🔊 indicator
-- Added warmup pings every 5 min to prevent cold starts
-- Removed all mic/ASR code from frontend
-- Committed and deployed to HF Spaces + GitHub
+## Changed This Session (2026-06-12)
+- **Fixed warmup no-op bug**: `server_app.py` warmup branch now actually POSTs to Modal with "Hm." prompt (was returning early without contacting Modal). Two regression tests added.
+- **Reordered warmup check** to run before the `text` required check, so warmup-only payloads work.
+- **Added `min_containers=1`** to `modal_tts.py` so Modal keeps at least one VoxCPM2 container warm at all times. Renamed from `keep_warm` per Modal 1.0 deprecation.
+- **Deployed modal_tts.py** to Modal; **pushed server_app.py + tests** to GitHub + HF Space.
+- **Simplified frontend warmup** to send only `{warmup: true}` (no more `text: "."` placeholder).
 
 ## Key Decisions
 - **TTS-only for now** — ASR/mic input deprioritized to focus on making Liang speak
 - **Modal over free APIs** — VoxCPM2 has no free hosted API; Modal gives reliable, controllable infrastructure
-- **Warmup pings** — Simple keep-alive to avoid 2-3 min cold starts during gameplay
+- **Two-layer keep-warm** — `min_containers=1` is the primary defense (always one warm container); 5-min frontend pings are belt-and-suspenders (also keep `scaledown_window=600` happy)
 - **Pre-recorded vs TTS** — Original Façade used 8,524 pre-recorded WAVs with human voice actors. For our generative AI game, TTS is the only practical approach.
 
 ## Pitfalls Learned
-- VoxCPM2 `from_pretrained()` with `local_dir` causes volume mount conflicts on Modal — must use `snapshot_download` or load from HF Hub directly
-- Nemotron ASR returns `Hypothesis` objects, not plain strings — need `.text` or `str()` extraction
-- Modal returns 303 redirects during cold start — `follow_redirects=True` required in httpx
-- Base64 encoding adds ~33% overhead to audio transfer — acceptable for hackathon demo
+- **Warmup was a no-op** — the original `if payload.get("warmup"): return JSONResponse(...)` short-circuited without ever calling Modal, so the 5-min frontend pings never kept VoxCPM2 warm. The cold-start problem was *not actually mitigated* by that commit. Fixed in this session.
+- **Warmup check ordering** — placing the `text` required check *before* the `warmup` check made warmup-only payloads return 400. Always check `warmup` first.
+- **VoxCPM2 `from_pretrained()` with `local_dir` causes volume mount conflicts on Modal** — must use `snapshot_download` or load from HF Hub directly
+- **Nemotron ASR returns `Hypothesis` objects, not plain strings** — need `.text` or `str()` extraction
+- **Modal returns 303 redirects during cold start** — `follow_redirects=True` required in httpx
+- **Base64 encoding adds ~33% overhead to audio transfer** — acceptable for hackathon demo
+- **`keep_warm` deprecated in Modal 1.0** — renamed to `min_containers`. Modal still accepts the old name with a deprecation warning, but new code should use `min_containers=N`.
+
+## Verified Latency (2026-06-12)
+| Step | Time |
+|---|---|
+| Warmup ping (server → Modal → server) | 2-3s |
+| TTS request (server → Modal → server) | 4-5s |
+| LLM chat (server → Modal LLM → server) | ~15s |
+| Full turn (LLM + TTS) | ~20s |
+| First TTS after Modal container restart | 8-12s (one-time ramp-up) |
 
 ## Next Steps (Priority Order)
-1. **Speed up TTS** — Currently 3-4s warm, investigate:
-   - Modal `keep_warm` or cron job to ping every 5 min
-   - Switch to A100 GPU for faster inference (costs more)
-   - Cache common greetings ("Welcome, traveler", etc.) as pre-generated WAVs
-2. **Add lip-sync / visual feedback** — While TTS generates, show Liang "preparing to speak" animation
-3. **ASR (future)** — Re-add mic button when ASR latency is acceptable
-4. **Voice quality** — Test VoxCPM2 with different voice descriptions for better Liang character match
+1. **A100 GPU** — Would cut warm TTS from 4-5s to ~2-3s. A100 is ~3x A10G cost (~$3/hr vs ~$1/hr) on Modal. The "performance is permanent" heuristic argues for it, but hackathon budget says wait. **Mitigates** but not **fixes** the full-turn latency — LLM (15s) is now the bottleneck.
+2. **ASR (future)** — Re-add mic button when ASR latency is acceptable
+3. **Voice quality** — Test VoxCPM2 with different voice descriptions for better Liang character match
+4. **Lip-sync / visual feedback** — While TTS generates, show Liang "preparing to speak" animation (some indication beyond the 🔊 emoji)
+5. **Cache common greetings** — Limited upside since Liang's responses are LLM-generated and not predictable. Skip unless hit-rate data shows otherwise.
 
 ## Config Verification
-- [ ] Modal endpoints healthy: `curl /healthz` on both TTS and ASR
-- [ ] HF Space env vars: `VOXCPM_API_URL` and `ASR_API_URL` set correctly
-- [ ] Frontend warmup ping working (check browser Network tab)
+- [x] Modal TTS endpoint healthy, `min_containers=1` active
+- [x] HF Space env vars: `VOXCPM_API_URL` and `ASR_API_URL` set correctly
+- [x] Frontend warmup ping reaches Modal end-to-end (verified 2026-06-12, ~2-3s)
+- [x] Warmup regression tests pass (`test_tts_warmup_actually_calls_modal`, `test_tts_warmup_silently_swallows_modal_errors`)
 
 ## Prize Stack Status
 - ✅ NVIDIA (Nemotron ASR deployed)
